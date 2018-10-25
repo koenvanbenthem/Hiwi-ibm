@@ -6,9 +6,24 @@
 rm(list=ls())
 
 #Names will be changed, i´ve just used the first Names that came to mind
-patches <-5
-  
-  for(i in 1:patches){
+
+
+##### DEFINED PARAMETERS #####
+
+P <-5 #number of patches
+mig <- 0 #migrationrate
+mut <- 0 #mutationrate
+T <- 0 #traitvalue
+d <- 0 #deathrate
+off <- 0 #possible offspringnumber
+cc <- 0 #carrying capacity
+Pmax <- 0 #maximal size of patch
+Pmin <- 0 #minimal size of patch
+
+
+ ##### LOOP FOR PATCHES #####
+
+  for(i in 1:P){ 
     Apollo <- round(rnorm(1, mean=50, sd=10)) #number male subjectsper patch
     Artemis <- round(rnorm(1, mean=50, sd=10)) #number female subjects per patch
     Leto <- rbind(matrix(rep("female",Artemis),ncol=1),matrix(rep("male",Apollo),ncol=1)) #matrix for the male and female subjects of the patch
