@@ -1,10 +1,8 @@
 #Basic IBM
 rm(list=ls())
 
-
-Nt<-1 #generations
-
-
+##### PARAMETERS #####
+Nt<-10000 #generations
 
 #fecundity
 a <-  0.49649467
@@ -37,26 +35,26 @@ trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from bo
 survival<-c(rep(1,N1),rep(1,N2)) #vector survival: is for all new individuals of both patches 1
   
 pop<-data.frame(patch,trait,survival) #data frame including all individuals out of both patches with the columns: patch, trait & survival
-  
 
-  patch<-c(rep(1,N1),rep(2,N2))
-  
-  trait<-c(rep(0.5,N1),rep(0.5,N2))
-  
-  survival<-c(rep(1,N1),rep(1,N2))
-  
-  pop<-data.frame(patch,trait,survival)
-  
+
+##### VECTORS #####
+pop.N1.vector <- c() #empty vector for the populationsize of each generation in patch 1
+pop.N2.vector <- c() #empty vector for the populationsize of each generation in patch 2
+trait.N1.vector <- c() #empty vector for the average trait-value of each generation in patch 1
+trait.N2.vector <- c() #empty vector for the average trait-value of each generation in patch 2
+
+
 ##### GENERATION LOOP START #####  
 for(t in 2:Nt){
-
   N1<-nrow(subset(pop,pop[,1]==1)) #N1 is every generation overwritten to keep updated 
   N2<-nrow(subset(pop,pop[,1]==2)) #N2 is every generation overwritten to keep updated
   N<-c(nrow(pop)) #how many individuals there are in both patches
+
+
+  ##### OFFSPRING #####
   N.0<-N/100
   N.1<-N1/100
   N.2<-N2/100
-  ##### OFFSPRING #####
   offspring<-c() #empty vector 
 
   if(N>0){
@@ -76,8 +74,27 @@ for(t in 2:Nt){
     }
     pop<-pop[c(1:nrow(pop),Hera),] #adds the clons of the individuals the the population data frame
   }
-  ##### DEATH #####
-  pop[1:N,3]<-pop[1:N,3]-1
-  pop<-subset(pop,pop[,3]>0)
-} ##### GENERATION LOOP END #####
 
+
+  ##### DEATH #####
+  pop[1:N,3]<-pop[1:N,3]-1 #survival set on 0
+  pop<-subset(pop,pop[,3]>0)
+
+  pop.N1.vector <- c(pop.N1.vector,nrow(subset(pop,pop[,1]==1)))
+  pop.N2.vector <- c(pop.N2.vector,nrow(subset(pop,pop[,1]==2)))
+ 
+  trait.N1.vector <- c(trait.N1.vector,subset(pop,pop[,1]==1)[,2])
+  trait.N2.vector <- c(trait.N2.vector,subset(pop,pop[,1]==2)[,2])
+
+} 
+##### GENERATION LOOP END #####
+
+
+##### PLOTS #####
+plot(pop.N1.vector, xlab="generations",ylab="populationsize",type="l",col="darkorange3") #plot populationsize
+lines(pop.N2.vector,type="l",col="green")
+legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("darkorange3","green"))
+
+plot(trait.N1.vector, xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
+lines(trait.N2.vector,type="l",col="blue")
+legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
