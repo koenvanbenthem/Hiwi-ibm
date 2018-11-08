@@ -82,10 +82,10 @@ for(t in 2:Nt){
 
 
 ##### PLOTS #####
-plot(pop.N1.vector, xlab="generations",ylab="populationsize",type="l",col="darkorange3") #plot populationsize
+plot(pop.N1.vector, main="populationsize over the generations",xlab="generations",ylab="populationsize",type="l",col="darkorange3") #plot populationsize
 lines(pop.N2.vector,type="l",col="green")
 legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("darkorange3","green"))
 
-plot(trait.N1.vector, xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
+plot(trait.N1.vector,main="average trait-value over the generations", xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
 lines(trait.N2.vector,type="l",col="blue")
 legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
