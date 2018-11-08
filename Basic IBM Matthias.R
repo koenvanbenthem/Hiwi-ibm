@@ -2,12 +2,12 @@
 rm(list=ls())
 
 
-Nt<-10000 #generations
+Nt<-1 #generations
 
 
 
 #fecundity
-a <-  0.59649467
+a <-  0.49649467
 b  <-  1.47718931
 c1    <-  0.72415095
 c2    <- -0.24464625
@@ -47,31 +47,25 @@ pop<-data.frame(patch,trait,survival) #data frame including all individuals out 
   
   pop<-data.frame(patch,trait,survival)
   
-  #Time
-  Nt<-3
-  
-  #Census->Offspring->Survival
-
-
-  
 ##### GENERATION LOOP START #####  
 for(t in 2:Nt){
 
   N1<-nrow(subset(pop,pop[,1]==1)) #N1 is every generation overwritten to keep updated 
   N2<-nrow(subset(pop,pop[,1]==2)) #N2 is every generation overwritten to keep updated
   N<-c(nrow(pop)) #how many individuals there are in both patches
-
-
+  N.0<-N/100
+  N.1<-N1/100
+  N.2<-N2/100
   ##### OFFSPRING #####
   offspring<-c() #empty vector 
 
   if(N>0){
     for(i in 1:N){
       if(pop[i,1]<2){ #if the individual is from patch 1
-        Nchild<-round(w(a,b,pop[i,2],1,N)) #number of offspring the individual i becomes calculated with the fitness function
+        Nchild<-round(w(a,b,pop[i,2],N.0,N.1)) #number of offspring the individual i becomes calculated with the fitness function
         offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
       }else{ #the individual is from patch 2
-        Nchild<-round(w(a,b,pop[i,2],2,N)) #number of offspring the individual i becomes calculated with the fitness function
+        Nchild<-round(w(a,b,pop[i,2],N.0,N.2)) #number of offspring the individual i becomes calculated with the fitness function
         offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
       }
     }
