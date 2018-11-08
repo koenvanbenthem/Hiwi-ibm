@@ -3,20 +3,29 @@ rm(list=ls())
 
 #fecundity
 
-a<-0.5
-b<-0.5
+a<-0.49649467
 
-c1<-1
-c2<-1
-c3<-1
-c4<-1
-c5<-1
-c6<-1
-c7<-1
-c8<-1
-c9<-1
-c10<-1
+b<-1.47718931
 
+c1<-0.72415095
+
+c2<--0.24464625
+
+c3<-0.99490196
+
+c4<--1.31337296
+
+c5<--0.06855583
+
+c6<-0.32833236
+
+c7<--20.88383990
+
+c8<--0.66263785
+
+c9<-2.39334027
+
+c10<-0.11670283
 
 w<-function(a,b,z,N,Np){
   y=a+b*plogis(c1+c2*N+c3*z+c4*(0.5*N-Np)+c5*N^2+c6*z^2+c7*(0.5*N-Np)^2+c8*z*N+
@@ -40,12 +49,12 @@ return(y)
   pop<-data.frame(patch,trait,survival)
   
   #Time
-  Nt<-10000
+  Nt<-3
   
   #Census->Offspring->Survival
 ###Generation-loop##Start##########  
   
-  for(t in 2:Nt){
+  for(t in 1:Nt){
     
     N1<-nrow(subset(pop,pop[,1]==1))
     
@@ -68,22 +77,19 @@ return(y)
        Nchild<-round(w(a,b,pop[i,2],2,N))
        offspring<-c(offspring,Nchild)
      }
-     }
+      
+    }
+    Hera<-c()
+    for(h in 1:N){
+      Child<-c(rep(h,offspring[h]))
+      Hera<-c(Hera,Child)
       }
-    
+    pop<-pop[c(1:nrow(pop),Hera),]
     
   }
-     
+   pop[1:N,3]<-pop[1:N,3]-1
+   pop<-subset(pop,pop[,3]>0)
+   
   }#generation end
-  Hera<-c()
-for(h in 1:N){
-  Child<-c(rep(h,offspring[h]))
-  Hera<-c(Hera,Child)
-}
-
-  pop<-pop[c(1:nrow(pop),Hera),]
   
-  #Death
-  pop[1:N,3]<-pop[1:N,3]-1
-  pop<-subset(pop,pop[,3]>0)
   
