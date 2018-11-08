@@ -40,8 +40,8 @@ pop<-data.frame(patch,trait,survival) #data frame including all individuals out 
 ##### GENERATION LOOP START #####  
 for(i in 1:Time){
     
-  N1<-nrow(subset(pop,pop[,1]==1))
-  N2<-nrow(subset(pop,pop[,1]==2))
+  N1<-nrow(subset(pop,pop[,1]==1)) #N1 is every generation overwritten to keep updated 
+  N2<-nrow(subset(pop,pop[,1]==2)) #N2 is every generation overwritten to keep updated
   N<-nrow(pop) #how many individuals there are in total
     
   ##### OFFSPRING #####
