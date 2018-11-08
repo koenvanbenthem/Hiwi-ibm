@@ -38,53 +38,44 @@ pop<-data.frame(patch,trait,survival) #data frame including all individuals out 
 
 
 ##### VECTORS #####
-pop.N1.vector <- c() #empty vector for the populationsize of each generation in patch 1
-pop.N2.vector <- c() #empty vector for the populationsize of each generation in patch 2
-trait.N1.vector <- c() #empty vector for the average trait-value of each generation in patch 1
-trait.N2.vector <- c() #empty vector for the average trait-value of each generation in patch 2
+pop.N1.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
+pop.N2.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 2
+trait.N1.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 1
+trait.N2.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 2
 
+pop.N1.vector[1] <- N1
+pop.N2.vector[1] <- N2
+trait.N1.vector <- mean(pop$trait[pop$patch==1])
+trait.N2.vector <- mean(pop$trait[pop$patch==2])
 
 ##### GENERATION LOOP START #####  
 for(t in 2:Nt){
-  N1<-nrow(subset(pop,pop[,1]==1)) #N1 is every generation overwritten to keep updated 
-  N2<-nrow(subset(pop,pop[,1]==2)) #N2 is every generation overwritten to keep updated
+  N1<-nrow(subset(pop,pop$patch==1)) #N1 is every generation overwritten to keep updated 
+  N2<-nrow(subset(pop,pop$patch==2)) #N2 is every generation overwritten to keep updated
   N<-c(nrow(pop)) #how many individuals there are in both patches
 
 
   ##### OFFSPRING #####
   N.0<-N/100
-  N.1<-N1/100
-  N.2<-N2/100
-  offspring<-c() #empty vector 
-
+  N.l <- c(N1/100,N2/100) # vector of local population sizes
+  
   if(N>0){
-    for(i in 1:N){
-      if(pop[i,1]<2){ #if the individual is from patch 1
-        Nchild<-round(w(a,b,pop[i,2],N.0,N.1)) #number of offspring the individual i becomes calculated with the fitness function
-        offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
-      }else{ #the individual is from patch 2
-        Nchild<-round(w(a,b,pop[i,2],N.0,N.2)) #number of offspring the individual i becomes calculated with the fitness function
-        offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
-      }
-    }
-    Hera<-c() #empty vector
-    for(h in 1:N){ 
-      Child<-c(rep(h,offspring[h])) #replicates the number of the individual * the number of offspring it becomes
-      Hera<-c(Hera,Child) #individual is so often named by its number, how many offspring it becomes
-    }
-    pop<-pop[c(1:nrow(pop),Hera),] #adds the clons of the individuals the the population data frame
+    Nchild <- rpois(nrow(pop),w(a,b,pop$trait,N.0,N.l[pop$patch])) 
   }
+    Hera <- rep(1:nrow(pop),Nchild)
+    
+    pop<-pop[c(1:nrow(pop),Hera),] #adds the clons of the individuals the the population data frame
 
 
   ##### DEATH #####
-  pop[1:N,3]<-pop[1:N,3]-1 #survival set on 0
-  pop<-subset(pop,pop[,3]>0)
+  pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
+  pop <-subset(pop,pop$survival>0)
 
-  pop.N1.vector <- c(pop.N1.vector,nrow(subset(pop,pop[,1]==1)))
-  pop.N2.vector <- c(pop.N2.vector,nrow(subset(pop,pop[,1]==2)))
+  pop.N1.vector[t] <-sum(pop$patch==1)
+  pop.N2.vector[t] <-sum(pop$patch==2)
  
-  trait.N1.vector <- c(trait.N1.vector,subset(pop,pop[,1]==1)[,2])
-  trait.N2.vector <- c(trait.N2.vector,subset(pop,pop[,1]==2)[,2])
+  trait.N1.vector[t] <- mean(pop$trait[pop$patch==1])
+  trait.N2.vector[t] <- mean(pop$trait[pop$patch==2])
 
 } 
 ##### GENERATION LOOP END #####
