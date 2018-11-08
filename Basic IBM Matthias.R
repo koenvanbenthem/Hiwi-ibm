@@ -54,8 +54,8 @@ w<-function(a,b,z,N,Np){
 
   
 ##### PATCHES #####
-N1<-round(rnorm(1, mean=50, sd=10)) #patch 1 is drawn 
-N2<-round(rnorm(1, mean=50, sd=10)) #patch 2 is drawn
+N1<-abs(rnorm(1, mean=50, sd=10)) #patch 1 is drawn 
+N2<-abs(rnorm(1, mean=50, sd=10)) #patch 2 is drawn
  
 patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
 trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from both patches set as 5
