@@ -75,8 +75,13 @@ return(y)
   }
      
   }#generation end
-  
-  pop<-pop[c(1:nrow(pop),1,1,1,2,2,4,5),]
+  Hera<-c()
+for(h in 1:N){
+  Child<-c(rep(h,offspring[h]))
+  Hera<-c(Hera,Child)
+}
+
+  pop<-pop[c(1:nrow(pop),Hera),]
   
   #Death
   pop[1:N,3]<-pop[1:N,3]-1
