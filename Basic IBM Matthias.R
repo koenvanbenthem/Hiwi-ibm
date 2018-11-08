@@ -76,8 +76,8 @@ for(t in 2:Nt){
   mig.N1 <- runif(nrow((subset(pop,pop$patch==1))),0,1) #draws so many uniformmly distributed numbers as there are individuals in patch 1
   mig.N2 <- runif(nrow((subset(pop,pop$patch==2))),0,1) #draws so many uniformmly distributed numbers as there are individuals in patch 2
 
-  mig.N1 <- ifelse(mig.N1>mig,0,1) #the individuals with a random number lower then the migration rate get the value 1 (migrate) & and the ones higher as the migration rate get the value 0 (dont migrate)
-  mig.N2 <- ifelse(mig.N2>mig,0,1) #the individuals with a random number lower then the migration rate get the value 1 (migrate) & and the ones higher as the migration rate get the value 0 (dont migrate)
+  mig.N1 <- ifelse(mig.N1>mig,1,2) #the individuals with a random number lower then the migration rate get the value 2 (migrates to patch 2) & and the ones higher as the migration rate get the value 1 (dont migrate, stay in patch 1)
+  mig.N2 <- ifelse(mig.N2>mig,2,1) #the individuals with a random number lower then the migration rate get the value 1 (migrate to patch 1) & and the ones higher as the migration rate get the value 2 (dont migrate,stay in patch 2)
 
   #### !!! ##### all individuals with a 1 need to migrate in the other patch #### !!! ####
   ##### MIGRATION END #####
