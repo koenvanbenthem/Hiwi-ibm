@@ -33,19 +33,19 @@ return(y)
   
   patch<-c(rep(1,N1),rep(2,N2))
   
-  trait<-c(rep(5,N1),rep(5,N2))
+  trait<-c(rep(0.5,N1),rep(0.5,N2))
   
   survival<-c(rep(1,N1),rep(1,N2))
   
   pop<-data.frame(patch,trait,survival)
   
   #Time
-  Time<-10000
+  Nt<-10000
   
   #Census->Offspring->Survival
 ###Generation-loop##Start##########  
   
-  for(i in 1:Time){
+  for(i in 1:Nt){
     
     N1<-nrow(subset(pop,pop[,1]==1))
     
@@ -77,5 +77,8 @@ return(y)
   }#generation end
   
   pop<-pop[c(1:nrow(pop),1,1,1,2,2,4,5),]
+  
+  #Death
   pop[1:N,3]<-pop[1:N,3]-1
+  pop<-subset(pop,pop[,3]>0)
   
