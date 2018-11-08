@@ -1,0 +1,100 @@
+#Basic IBM
+rm(list=ls())
+
+##### PARAMETERS #####
+Nt<-10000 #generations
+
+#fecundity
+a <-  0.49649467
+b  <-  1.47718931
+c1    <-  0.72415095
+c2    <- -0.24464625
+c3    <-  0.99490196
+c4    <- -1.31337296
+c5    <- -0.06855583
+c6    <-  0.32833236
+c7    <--20.88383990
+c8    <- -0.66263785
+c9    <-  2.39334027
+c10   <-  0.11670283
+
+##### FUNCTIONS #####
+w<-function(a,b,z,N,Np){
+  y=a+b*plogis(c1+c2*N+c3*z+c4*(0.5*N-Np)+c5*N^2+c6*z^2+c7*(0.5*N-Np)^2+c8*z*N+
+              c9*z*(0.5*N-Np)+c10*N*(0.5*N-Np))
+  return(y)
+  }
+
+  
+##### PATCHES #####
+N1<-abs(rnorm(1, mean=50, sd=10)) #patch 1 is drawn 
+N2<-abs(rnorm(1, mean=50, sd=10)) #patch 2 is drawn
+ 
+patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
+trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from both patches set as 5
+survival<-c(rep(1,N1),rep(1,N2)) #vector survival: is for all new individuals of both patches 1
+  
+pop<-data.frame(patch,trait,survival) #data frame including all individuals out of both patches with the columns: patch, trait & survival
+
+
+##### VECTORS #####
+pop.N1.vector <- c() #empty vector for the populationsize of each generation in patch 1
+pop.N2.vector <- c() #empty vector for the populationsize of each generation in patch 2
+trait.N1.vector <- c() #empty vector for the average trait-value of each generation in patch 1
+trait.N2.vector <- c() #empty vector for the average trait-value of each generation in patch 2
+
+
+##### GENERATION LOOP START #####  
+for(t in 2:Nt){
+  N1<-nrow(subset(pop,pop[,1]==1)) #N1 is every generation overwritten to keep updated 
+  N2<-nrow(subset(pop,pop[,1]==2)) #N2 is every generation overwritten to keep updated
+  N<-c(nrow(pop)) #how many individuals there are in both patches
+
+
+  ##### OFFSPRING #####
+  N.0<-N/100
+  N.1<-N1/100
+  N.2<-N2/100
+  offspring<-c() #empty vector 
+
+  if(N>0){
+    for(i in 1:N){
+      if(pop[i,1]<2){ #if the individual is from patch 1
+        Nchild<-round(w(a,b,pop[i,2],N.0,N.1)) #number of offspring the individual i becomes calculated with the fitness function
+        offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
+      }else{ #the individual is from patch 2
+        Nchild<-round(w(a,b,pop[i,2],N.0,N.2)) #number of offspring the individual i becomes calculated with the fitness function
+        offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
+      }
+    }
+    Hera<-c() #empty vector
+    for(h in 1:N){ 
+      Child<-c(rep(h,offspring[h])) #replicates the number of the individual * the number of offspring it becomes
+      Hera<-c(Hera,Child) #individual is so often named by its number, how many offspring it becomes
+    }
+    pop<-pop[c(1:nrow(pop),Hera),] #adds the clons of the individuals the the population data frame
+  }
+
+
+  ##### DEATH #####
+  pop[1:N,3]<-pop[1:N,3]-1 #survival set on 0
+  pop<-subset(pop,pop[,3]>0)
+
+  pop.N1.vector <- c(pop.N1.vector,nrow(subset(pop,pop[,1]==1)))
+  pop.N2.vector <- c(pop.N2.vector,nrow(subset(pop,pop[,1]==2)))
+ 
+  trait.N1.vector <- c(trait.N1.vector,subset(pop,pop[,1]==1)[,2])
+  trait.N2.vector <- c(trait.N2.vector,subset(pop,pop[,1]==2)[,2])
+
+} 
+##### GENERATION LOOP END #####
+
+
+##### PLOTS #####
+plot(pop.N1.vector, xlab="generations",ylab="populationsize",type="l",col="darkorange3") #plot populationsize
+lines(pop.N2.vector,type="l",col="green")
+legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("darkorange3","green"))
+
+plot(trait.N1.vector, xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
+lines(trait.N2.vector,type="l",col="blue")
+legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
