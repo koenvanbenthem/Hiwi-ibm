@@ -54,14 +54,14 @@ w<-function(a,b,z,N,Np){
 
   
 ##### PATCHES #####
-N1<-abs(round(rnorm(1, mean=50, sd=10)))
-N2<-abs(round(rnorm(1, mean=50, sd=10)))
+N1<-round(rnorm(1, mean=50, sd=10)) #patch 1 is drawn 
+N2<-round(rnorm(1, mean=50, sd=10)) #patch 2 is drawn
  
-patch<-c(rep(1,N1),rep(2,N2))
-trait<-c(rep(0.5,N1),rep(0.5,N2))
-survival<-c(rep(1,N1),rep(1,N2))
-
-pop<-data.frame(patch,trait,survival)
+patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
+trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from both patches set as 5
+survival<-c(rep(1,N1),rep(1,N2)) #vector survival: is for all new individuals of both patches 1
+  
+pop<-data.frame(patch,trait,survival) #data frame including all individuals out of both patches with the columns: patch, trait & survival
   
 <<<<<<< HEAD
   patch<-c(rep(1,N1),rep(2,N2))
@@ -89,16 +89,24 @@ pop<-data.frame(patch,trait,survival)
   
 ##### GENERATION LOOP START #####  
 for(t in 2:Nt){
+<<<<<<< HEAD
   N1<-nrow(subset(pop,pop[,1]==1))
   N2<-nrow(subset(pop,pop[,1]==2))
   N<-nrow(pop)
 >>>>>>> 12102607a97417bdd58941ca79fe039747574d42
    
+=======
+  N1<-nrow(subset(pop,pop[,1]==1)) #N1 is every generation overwritten to keep updated 
+  N2<-nrow(subset(pop,pop[,1]==2)) #N2 is every generation overwritten to keep updated
+  N<-c(nrow(pop)) #how many individuals there are in both patches
+
+>>>>>>> 7181cb05c41790b6a03a1c59521160db194346e7
   ##### OFFSPRING #####
-  offspring<-c()
-    
+  offspring<-c() #empty vector 
+
   if(N>0){
     for(i in 1:N){
+<<<<<<< HEAD
 <<<<<<< HEAD
      if(pop[i,1]<2){
        Nchild<-round(w(a,b,pop[i,2],1,N))
@@ -128,6 +136,12 @@ for(t in 2:Nt){
         Nchild<-round(w(a,b,pop[i,2],1,N))
         offspring<-c(offspring,Nchild)
       }else{
+=======
+      if(pop[i,1]<2){ #if the individual is from patch 1
+        Nchild<-round(w(a,b,pop[i,2],1,N)) #number of offspring the individual i becomes calculated with the fitness function
+        offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
+      }else{ #the individual is from patch 2
+>>>>>>> 7181cb05c41790b6a03a1c59521160db194346e7
         Nchild<-round(w(a,b,pop[i,2],2,N)) #number of offspring the individual i becomes calculated with the fitness function
         offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
       }
