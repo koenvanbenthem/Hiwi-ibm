@@ -19,7 +19,7 @@ c10<-1
 
 
 w<-function(a,b,z,N,Np){
-  y=a+b*log(c1+c2*N+c3*z+c4*(0.5*N-Np)+c5*N^2+c6*z^2+c7*(0.5*N-Np)^2+c8*z*N+
+  y=a+b*plogis(c1+c2*N+c3*z+c4*(0.5*N-Np)+c5*N^2+c6*z^2+c7*(0.5*N-Np)^2+c8*z*N+
               c9*z*(0.5*N-Np)+c10*N*(0.5*N-Np))
 return(y)
   }
