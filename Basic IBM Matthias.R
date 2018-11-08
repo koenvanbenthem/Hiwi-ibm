@@ -1,51 +1,26 @@
 #Basic IBM
 rm(list=ls())
 
-##### PARAMETERS #####
+
 Nt<-10000 #generations
 
 
-a<-0.49649467
-
-b<-1.47718931
-
-c1<-0.72415095
-
-c2<--0.24464625
-
-c3<-0.99490196
-
-c4<--1.31337296
-
-c5<--0.06855583
-
-c6<-0.32833236
-
-c7<--20.88383990
-
-c8<--0.66263785
-
-c9<-2.39334027
-
-c10<-0.11670283
-
 
 #fecundity
-a<-0.5
-b<-0.5
-c1<-1
-c2<-1
-c3<-1
-c4<-1
-c5<-1
-c6<-1
-c7<-1
-c8<-1
-c9<-1
-c10<-1
+a <-  0.59649467
+b  <-  1.47718931
+c1    <-  0.72415095
+c2    <- -0.24464625
+c3    <-  0.99490196
+c4    <- -1.31337296
+c5    <- -0.06855583
+c6    <-  0.32833236
+c7    <--20.88383990
+c8    <- -0.66263785
+c9    <-  2.39334027
+c10   <-  0.11670283
 
 ##### FUNCTIONS #####
-
 w<-function(a,b,z,N,Np){
   y=a+b*plogis(c1+c2*N+c3*z+c4*(0.5*N-Np)+c5*N^2+c6*z^2+c7*(0.5*N-Np)^2+c8*z*N+
               c9*z*(0.5*N-Np)+c10*N*(0.5*N-Np))
@@ -76,10 +51,11 @@ pop<-data.frame(patch,trait,survival) #data frame including all individuals out 
   Nt<-3
   
   #Census->Offspring->Survival
+
+
   
 ##### GENERATION LOOP START #####  
 for(t in 2:Nt){
-  
 
   N1<-nrow(subset(pop,pop[,1]==1)) #N1 is every generation overwritten to keep updated 
   N2<-nrow(subset(pop,pop[,1]==2)) #N2 is every generation overwritten to keep updated
@@ -95,7 +71,6 @@ for(t in 2:Nt){
         Nchild<-round(w(a,b,pop[i,2],1,N)) #number of offspring the individual i becomes calculated with the fitness function
         offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
       }else{ #the individual is from patch 2
-
         Nchild<-round(w(a,b,pop[i,2],2,N)) #number of offspring the individual i becomes calculated with the fitness function
         offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
       }
