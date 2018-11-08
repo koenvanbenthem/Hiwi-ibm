@@ -3,6 +3,7 @@ rm(list=ls())
 
 ##### PARAMETERS #####
 Nt<-10000 #generations
+mig <- 0.05 #migrationfactor
 
 #fecundity
 a <-  0.49649467
@@ -69,6 +70,17 @@ for(t in 2:Nt){
   pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
   pop <-subset(pop,pop$survival>0)
   ##### END DEATH #####
+
+
+  ##### MIGRATION START #####
+  mig.N1 <- runif(nrow((subset(pop,pop$patch==1))),0,1) #draws so many uniformmly distributed numbers as there are individuals in patch 1
+  mig.N2 <- runif(nrow((subset(pop,pop$patch==2))),0,1) #draws so many uniformmly distributed numbers as there are individuals in patch 2
+
+  mig.N1 <- ifelse(mig.N1>mig,0,1) #the individuals with a random number lower then the migration rate get the value 1 (migrate) & and the ones higher as the migration rate get the value 0 (dont migrate)
+  mig.N2 <- ifelse(mig.N2>mig,0,1) #the individuals with a random number lower then the migration rate get the value 1 (migrate) & and the ones higher as the migration rate get the value 0 (dont migrate)
+
+  #### !!! ##### all individuals with a 1 need to migrate in the other patch #### !!! ####
+  ##### MIGRATION END #####
 
 
   pop.N1.vector[t] <-sum(pop$patch==1) #overwrites the populationsizes for each generation in the empty vector (patch 1)
