@@ -86,6 +86,8 @@ for(t in 2:Nt){
   trait.N1.vector <- c(trait.N1.vector,subset(pop,pop[,1]==1)[,2])
   trait.N2.vector <- c(trait.N2.vector,subset(pop,pop[,1]==2)[,2])
 
+  
+  #Migration
 } 
 ##### GENERATION LOOP END #####
 
