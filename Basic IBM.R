@@ -47,36 +47,35 @@ return(y)
   
   for(i in 1:Time){
     
-    N1<-nrow(subset(old,old[,1]==1))
+    N1<-nrow(subset(pop,pop[,1]==1))
     
-    N2<-nrow(subset(old,old[,1]==2))
+    N2<-nrow(subset(pop,pop[,1]==2))
     
-    N<-nrow(old)
-    
-    newp<-c()
-    newt<-c()
-    newa<-c()
+    N<-nrow(pop)
+   
     
     
     #offspring
-    for(z in 2:Time){
-    new<- data.frame(nrow=0,ncol=3)
-    newp<-c()
-    newt<-c()
-    newa<-c()
-    }
+ 
+   offspring<-c()
     
   if(N>0){
     for(i in 1:N){
-     # Nchild<-round(w(a,b,old[i,2],N,))
-      newp<-c(newp,(rep(old$patch[i],Nchild)))
-      newt<-c(newt,(rep(old$trait[i],Nchild)))
-      newa<-c(newa,(rep(old$age[i],Nchild)))
-      
-    }
+     if(pop[i,1]<2){
+       Nchild<-round(w(a,b,pop[i,2],1,N))
+      offspring<-c(offspring,Nchild)
+     }else{
+       Nchild<-round(w(a,b,pop[i,2],2,N))
+       offspring<-c(offspring,Nchild)
+     }
+     }
+      }
+    
+    
   }
-   pop<-
      
   }#generation end
   
+  pop<-pop[c(1:nrow(pop),1,1,1,2,2,4,5),]
+  pop[1:N,3]<-pop[1:N,3]-1
   
