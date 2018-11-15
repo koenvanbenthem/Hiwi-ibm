@@ -2,7 +2,9 @@
 rm(list=ls())
 
 ##### PARAMETERS #####
-Nt<-10000 #generations
+replic<-2
+Nt<-10 #generations
+mig <- 0.05 #migrationfactor
 
 #fecundity
 a <-  0.49649467
@@ -20,15 +22,14 @@ c10   <-  0.11670283
 
 ##### FUNCTIONS #####
 w<-function(a,b,z,N,Np){
-  y=a+b*plogis(c1+c2*N+c3*z+c4*(0.5*N-Np)+c5*N^2+c6*z^2+c7*(0.5*N-Np)^2+c8*z*N+
-              c9*z*(0.5*N-Np)+c10*N*(0.5*N-Np))
+  y=a+b*plogis(c1+c2*N+c3*z+c4*(0.5*N-Np)+c5*N^2+c6*z^2+c7*(0.5*N-Np)^2+c8*z*N+c9*z*(0.5*N-Np)+c10*N*(0.5*N-Np))
   return(y)
   }
 
   
 ##### PATCHES #####
-N1<-abs(rnorm(1, mean=50, sd=10)) #patch 1 is drawn 
-N2<-abs(rnorm(1, mean=50, sd=10)) #patch 2 is drawn
+N1<-abs(rnorm(1, mean=250, sd=10)) #patch 1 is drawn 
+N2<-abs(rnorm(1, mean=250, sd=10)) #patch 2 is drawn
  
 patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
 trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from both patches set as 5
@@ -38,65 +39,88 @@ pop<-data.frame(patch,trait,survival) #data frame including all individuals out 
 
 
 ##### VECTORS #####
-pop.N1.vector <- c() #empty vector for the populationsize of each generation in patch 1
-pop.N2.vector <- c() #empty vector for the populationsize of each generation in patch 2
-trait.N1.vector <- c() #empty vector for the average trait-value of each generation in patch 1
-trait.N2.vector <- c() #empty vector for the average trait-value of each generation in patch 2
+pop.N1.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
+pop.N2.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 2
+trait.N1.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 1
+trait.N2.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 2
 
+pop.N1.vector[1] <- N1 #populationsize for the first generation of patch 1
+pop.N2.vector[1] <- N2 #populationsize for the first generation of patch 2
+trait.N1.vector <- mean(pop$trait[pop$patch==1]) #average trait-value for the first generation of patch 1
+trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the first generation of patch 2
+
+
+##### REPLICATION LOOP START#####
+
+for(r in 1:replic){
+  
 
 ##### GENERATION LOOP START #####  
 for(t in 2:Nt){
-  N1<-nrow(subset(pop,pop[,1]==1)) #N1 is every generation overwritten to keep updated 
-  N2<-nrow(subset(pop,pop[,1]==2)) #N2 is every generation overwritten to keep updated
+  N1<-nrow(subset(pop,pop$patch==1)) #N1 is every generation overwritten to keep updated 
+  N2<-nrow(subset(pop,pop$patch==2)) #N2 is every generation overwritten to keep updated
   N<-c(nrow(pop)) #how many individuals there are in both patches
 
 
   ##### OFFSPRING #####
-  N.0<-N/100
-  N.1<-N1/100
-  N.2<-N2/100
-  offspring<-c() #empty vector 
-
+  N.0<-N/500
+  N.l <- c(N1/500,N2/500) # vector of local population sizes
+  
   if(N>0){
-    for(i in 1:N){
-      if(pop[i,1]<2){ #if the individual is from patch 1
-        Nchild<-round(w(a,b,pop[i,2],N.0,N.1)) #number of offspring the individual i becomes calculated with the fitness function
-        offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
-      }else{ #the individual is from patch 2
-        Nchild<-round(w(a,b,pop[i,2],N.0,N.2)) #number of offspring the individual i becomes calculated with the fitness function
-        offspring<-c(offspring,Nchild) #new number for the individual i is added to the already existing numbers of offspring from the individuals before
-      }
-    }
-    Hera<-c() #empty vector
-    for(h in 1:N){ 
-      Child<-c(rep(h,offspring[h])) #replicates the number of the individual * the number of offspring it becomes
-      Hera<-c(Hera,Child) #individual is so often named by its number, how many offspring it becomes
-    }
-    pop<-pop[c(1:nrow(pop),Hera),] #adds the clons of the individuals the the population data frame
+    Nchild <- rpois(nrow(pop),w(a,b,pop$trait,N.0,N.l[pop$patch])) #vectoe with number of offspring for each individual out of a poisson distribution
   }
+    Hera <- rep(1:nrow(pop),Nchild) #replicates the individual to clone times the number it becomes offspring
+    pop<-pop[c(1:nrow(pop),Hera),] #adds the clons of the individuals the the population data frame
 
 
   ##### DEATH #####
-  pop[1:N,3]<-pop[1:N,3]-1 #survival set on 0
-  pop<-subset(pop,pop[,3]>0)
+  pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
+  pop <-subset(pop,pop$survival>0)
+  ##### END DEATH #####
 
-  pop.N1.vector <- c(pop.N1.vector,nrow(subset(pop,pop[,1]==1)))
-  pop.N2.vector <- c(pop.N2.vector,nrow(subset(pop,pop[,1]==2)))
+
+  ##### MIGRATION START #####
+  mig.N1 <- runif(nrow((subset(pop,pop$patch==1))),0,1) #draws so many uniformmly distributed numbers as there are individuals in patch 1
+  mig.N2 <- runif(nrow((subset(pop,pop$patch==2))),0,1) #draws so many uniformmly distributed numbers as there are individuals in patch 2
+
+  mig.N1 <- ifelse(mig.N1>mig,1,2) #the individuals with a random number lower then the migration rate get the value 2 (migrates to patch 2) & and the ones higher as the migration rate get the value 1 (dont migrate, stay in patch 1)
+  mig.N2 <- ifelse(mig.N2>mig,2,1) #the individuals with a random number lower then the migration rate get the value 1 (migrate to patch 1) & and the ones higher as the migration rate get the value 2 (dont migrate,stay in patch 2)
+  
+  migration<-c(mig.N1,mig.N2)
+  pop$patch<-migration
+  
+  chaos<-order(pop$patch)
+  pop<-pop[chaos,]
+  
+  
+  #### !!! ##### all individuals with a 1 need to migrate in the other patch #### !!! ####
+  ##### MIGRATION END #####
+  
+  
+  pop.N1.vector[t] <-sum(pop$patch==1) #overwrites the populationsizes for each generation in the empty vector (patch 1)
+  pop.N2.vector[t] <-sum(pop$patch==2) #overwrites the average trait-value for each generation in the empty vector (patch 2)
  
-  trait.N1.vector <- c(trait.N1.vector,subset(pop,pop[,1]==1)[,2])
-  trait.N2.vector <- c(trait.N2.vector,subset(pop,pop[,1]==2)[,2])
+  trait.N1.vector[t] <- mean(pop$trait[pop$patch==1]) #overwrites the average trait-value for each generation in the empty vector (patch 1)
+  trait.N2.vector[t] <- mean(pop$trait[pop$patch==2]) #overwrites the average trait-value for each generation in the empty vector (patch 2)
 
   
-  #Migration
+  rownames(pop) <- 1:nrow(pop)        #re-indexing the population to prevent 1.1.3.2.4.....
 } 
 ##### GENERATION LOOP END #####
 
+#pdf(paste("graph",r,".pdf",sep=""))
+#plot(pop.N1.vector, main="populationsize over the generations",xlab="generations",ylab="populationsize",type="l",col="darkorange3") #plot populationsize
+#lines(pop.N2.vector,type="l",col="green") #includes the populationsize of patch 2
+#legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("darkorange3","green"))
+#dev.off()
+#  print(r)
+}
+##### REPLICATION LOOP END#####
+
 
 ##### PLOTS #####
-plot(pop.N1.vector, xlab="generations",ylab="populationsize",type="l",col="darkorange3") #plot populationsize
-lines(pop.N2.vector,type="l",col="green")
-legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("darkorange3","green"))
 
-plot(trait.N1.vector, xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
-lines(trait.N2.vector,type="l",col="blue")
+plot(trait.N1.vector,main="average trait-value over the generations", xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
+lines(trait.N2.vector,type="l",col="blue") #includes the average trait-value of patch 2
 legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
+
