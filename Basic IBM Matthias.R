@@ -1,12 +1,14 @@
 #Basic IBM
 rm(list=ls())
 
+
 ##### PARAMETERS #####
-replic<-2
-Nt<-10 #generations
+replic <- 2 #number of replicates
+Nt <- 10 #generations
 mig <- 0.05 #migrationfactor
 
-#fecundity
+
+##### FECUNDITY #####
 a <-  0.49649467
 b  <-  1.47718931
 c1    <-  0.72415095
@@ -15,14 +17,15 @@ c3    <-  0.99490196
 c4    <- -1.31337296
 c5    <- -0.06855583
 c6    <-  0.32833236
-c7    <--20.88383990
+c7    <- -20.88383990
 c8    <- -0.66263785
 c9    <-  2.39334027
 c10   <-  0.11670283
 
+
 ##### FUNCTIONS #####
 w<-function(a,b,z,N,Np){
-  y=a+b*plogis(c1+c2*N+c3*z+c4*(0.5*N-Np)+c5*N^2+c6*z^2+c7*(0.5*N-Np)^2+c8*z*N+c9*z*(0.5*N-Np)+c10*N*(0.5*N-Np))
+  y = a+b*plogis(c1+c2*N+c3*z+c4*(0.5*N-Np)+c5*N^2+c6*z^2+c7*(0.5*N-Np)^2+c8*z*N+c9*z*(0.5*N-Np)+c10*N*(0.5*N-Np))
   return(y)
   }
 
@@ -51,7 +54,6 @@ trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the fi
 
 
 ##### REPLICATION LOOP START#####
-
 for(r in 1:replic){
   
 
@@ -63,20 +65,19 @@ for(t in 2:Nt){
 
 
   ##### OFFSPRING #####
-  N.0<-N/500
+  N.0 <- N/500
   N.l <- c(N1/500,N2/500) # vector of local population sizes
   
   if(N>0){
     Nchild <- rpois(nrow(pop),w(a,b,pop$trait,N.0,N.l[pop$patch])) #vectoe with number of offspring for each individual out of a poisson distribution
   }
     Hera <- rep(1:nrow(pop),Nchild) #replicates the individual to clone times the number it becomes offspring
-    pop<-pop[c(1:nrow(pop),Hera),] #adds the clons of the individuals the the population data frame
+    pop <- pop[c(1:nrow(pop),Hera),] #adds the clons of the individuals the the population data frame
 
 
   ##### DEATH #####
   pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
   pop <-subset(pop,pop$survival>0)
-  ##### END DEATH #####
 
 
   ##### MIGRATION START #####
@@ -86,25 +87,23 @@ for(t in 2:Nt){
   mig.N1 <- ifelse(mig.N1>mig,1,2) #the individuals with a random number lower then the migration rate get the value 2 (migrates to patch 2) & and the ones higher as the migration rate get the value 1 (dont migrate, stay in patch 1)
   mig.N2 <- ifelse(mig.N2>mig,2,1) #the individuals with a random number lower then the migration rate get the value 1 (migrate to patch 1) & and the ones higher as the migration rate get the value 2 (dont migrate,stay in patch 2)
   
-  migration<-c(mig.N1,mig.N2)
-  pop$patch<-migration
+  migration <-c (mig.N1,mig.N2)
+  pop$patch <- migration
   
-  chaos<-order(pop$patch)
-  pop<-pop[chaos,]
-  
-  
+  chaos <- order(pop$patch) 
+  pop <- pop[chaos,]
   #### !!! ##### all individuals with a 1 need to migrate in the other patch #### !!! ####
   ##### MIGRATION END #####
   
-  
-  pop.N1.vector[t] <-sum(pop$patch==1) #overwrites the populationsizes for each generation in the empty vector (patch 1)
-  pop.N2.vector[t] <-sum(pop$patch==2) #overwrites the average trait-value for each generation in the empty vector (patch 2)
+
+  pop.N1.vector[t] <- sum(pop$patch==1) #overwrites the populationsizes for each generation in the empty vector (patch 1)
+  pop.N2.vector[t] <- sum(pop$patch==2) #overwrites the average trait-value for each generation in the empty vector (patch 2)
  
   trait.N1.vector[t] <- mean(pop$trait[pop$patch==1]) #overwrites the average trait-value for each generation in the empty vector (patch 1)
   trait.N2.vector[t] <- mean(pop$trait[pop$patch==2]) #overwrites the average trait-value for each generation in the empty vector (patch 2)
 
   
-  rownames(pop) <- 1:nrow(pop)        #re-indexing the population to prevent 1.1.3.2.4.....
+  rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
 } 
 ##### GENERATION LOOP END #####
 
@@ -115,11 +114,10 @@ for(t in 2:Nt){
 #dev.off()
 #  print(r)
 }
-##### REPLICATION LOOP END#####
+##### REPLICATION LOOP END #####
 
 
 ##### PLOTS #####
-
 plot(trait.N1.vector,main="average trait-value over the generations", xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
 lines(trait.N2.vector,type="l",col="blue") #includes the average trait-value of patch 2
-legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
+legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue")) #plotts the legend
