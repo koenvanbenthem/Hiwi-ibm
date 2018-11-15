@@ -1,14 +1,16 @@
 #Basic IBM
 rm(list=ls())
-
+load(genMat)
 
 ##### PARAMETERS #####
+##### overall #####
 replic <- 2 #number of replicates
 Nt <- 10 #generations
 mig <- 0.05 #migrationfactor
+N_genes <- dim(gen_phen_map)[3]
+N_alleles <- dim(gen_phen_map)[1]
 
-
-##### FECUNDITY #####
+##### fecundity #####
 a <-  0.49649467
 b  <-  1.47718931
 c1    <-  0.72415095
@@ -33,12 +35,15 @@ w<-function(a,b,z,N,Np){
 ##### PATCHES #####
 N1<-abs(rnorm(1, mean=250, sd=10)) #patch 1 is drawn 
 N2<-abs(rnorm(1, mean=250, sd=10)) #patch 2 is drawn
+N1.m <- round(runif(1,N1/4,3*N1/4)) #how many individuals from patch 1 are male
+N2.m <- round(runif(1,N2/4,3*N2/4)) #how many individuals from patch 2 are male
  
 patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
+gender <- c(rep("male",N1.m),rep("female",N1-N1.m),rep("male",N2.m),rep("female",N2-N2.m))
 trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from both patches set as 5
 survival<-c(rep(1,N1),rep(1,N2)) #vector survival: is for all new individuals of both patches 1
   
-pop<-data.frame(patch,trait,survival) #data frame including all individuals out of both patches with the columns: patch, trait & survival
+pop<-data.frame(patch,gender,trait,survival) #data frame including all individuals out of both patches with the columns: patch, trait & survival
 
 
 ##### VECTORS #####
