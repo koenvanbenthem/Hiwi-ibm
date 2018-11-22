@@ -30,9 +30,9 @@ w<-function(a,b,z,N,Np){
 ##### PATCHES #####
 N1<-abs(rnorm(1, mean=250, sd=10)) #patch 1 is drawn 
 N2<-abs(rnorm(1, mean=250, sd=10)) #patch 2 is drawn
-N1.m<-round(runif(1,N1/4,3*N1/4))
-N2.m<-round(runif(1,N1/4,3*N1/4))
- 
+N1.m<-round(runif(1,N1/4,3*N1/4))  #number of males in patch 1
+N2.m<-round(runif(1,N1/4,3*N1/4))  #number of males in patch 2
+
 patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
 gender<-c(rep("male",N1.m),rep("female",N1-N1.m),rep("male",N2.m),rep("female",N2-N2.m))
 trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from both patches set as 5
