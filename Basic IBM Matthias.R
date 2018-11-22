@@ -4,6 +4,7 @@
 replic<-2 #replicates
 Nt<-10 #generations
 mig <- 0.05 #migrationfactor
+L <- 10 #number of locis
 
 #fecundity
 a <-  0.49649467
@@ -57,17 +58,17 @@ trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the fi
 for(r in 1:replic){
   
   population <- nrow(subset(pop,pop$patch==1)) + nrow(subset(pop,pop$patch==2)) #number of individuals
-  loci <- matrix(NA,nrow=population,ncol=20) #empty matrix for the locis
+  loci <- matrix(NA,nrow=population,ncol=2*L) #empty matrix for the locis
   for(p in 1:population){ #for each individual
-    loci[p,] <- round(runif(20,1,10)) #each individual has 20 random numbers (first 10:row //last 10:column)
+    loci[p,] <- round(runif(2*L,1,L)) #each individual has 20 random numbers (first 10:row //last 10:column)
   }
   
-  values <- matrix(NA,nrow=population,ncol=10) #empty matrix for the trait values for each loci
+  values <- matrix(NA,nrow=population,ncol=L) #empty matrix for the trait values for each loci
   for(q in 1:population){ #for each individual
-    for(r in 1:10){ 
-      values[q,r] <- gen_phen_map[r,loci[q,r],loci[q,10+r]]
+    for(r in 1:L){ #for each loci
+      values[q,r] <- gen_phen_map[r,loci[q,r],loci[q,L+r]] #draws the number (x,y) out of the layer r of the map and puts it into the matrix values
     }
-    pop[q,3] <- abs(sum(values[q,]))
+    pop[q,3] <- abs(sum(values[q,])) #sums up all 10 values for each individual and writes it as trait into the pop matrix
   }
   
 
@@ -79,7 +80,7 @@ for(r in 1:replic){
   
   
     ##### OFFSPRING #####
-    N.0<-N/500
+    N.0 <- N/500
     N.l <- c(N1/500,N2/500) # vector of local population sizes
     
     if(N>0){
