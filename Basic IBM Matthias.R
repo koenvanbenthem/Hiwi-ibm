@@ -1,8 +1,7 @@
 #Basic IBM
-rm(list=ls())
 
 ##### PARAMETERS #####
-replic<-2
+replic<-2 #replicates
 Nt<-10 #generations
 mig <- 0.05 #migrationfactor
 
@@ -57,17 +56,18 @@ trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the fi
 
 for(r in 1:replic){
   
-  pop <- round(N1) + round(N2) #number of individuals
-  loci <- matrix(NA,nrow=pop,ncol=20) #empty matrix for the locis
-  for(p in 1:pop){ #for each individual
+  population <- nrow(subset(pop,pop$patch==1)) + nrow(subset(pop,pop$patch==2)) #number of individuals
+  loci <- matrix(NA,nrow=population,ncol=20) #empty matrix for the locis
+  for(p in 1:population){ #for each individual
     loci[p,] <- round(runif(20,1,10)) #each individual has 20 random numbers (first 10:row //last 10:column)
   }
   
-  values <- matrix(NA,nrow=pop,ncol=10) #empty matrix for the trait values for each loci
-  for(q in 1:pop){ #for each individual
+  values <- matrix(NA,nrow=population,ncol=10) #empty matrix for the trait values for each loci
+  for(q in 1:population){ #for each individual
     for(r in 1:10){ 
-      values[q,r] <- abs(sum(gen_phen_map[r,loci[q,r],loci[q,10+r]]))
+      values[q,r] <- gen_phen_map[r,loci[q,r],loci[q,10+r]]
     }
+    pop[q,3] <- abs(sum(values[q,]))
   }
   
 
