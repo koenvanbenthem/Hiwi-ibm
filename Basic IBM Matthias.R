@@ -28,13 +28,17 @@ w<-function(a,b,z,N,Np){
 
   
 ##### PATCHES #####
+N1<-abs(rnorm(1, mean=250, sd=10)) #patch 1 is drawn 
+N2<-abs(rnorm(1, mean=250, sd=10)) #patch 2 is drawn
+N1.m<-round(runif(1,N1/4,3*N1/4))
+N2.m<-round(runif(1,N1/4,3*N1/4))
  
 patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
-gender<-c(rep("male",N1.m),rep("female",N1-N1.m),rep("male",N2.m),rep("female",N2-N2.m)) #vector gender: is filled with males and females
+gender<-c(rep("male",N1.m),rep("female",N1-N1.m),rep("male",N2.m),rep("female",N2-N2.m))
 trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from both patches set as 5
 survival<-c(rep(1,N1),rep(1,N2)) #vector survival: is for all new individuals of both patches 1
   
-pop<-data.frame(patch,gender,trait,survival) #data frame including all individuals out of both patches with the columns: patch, gender, trait & survival
+pop<-data.frame(patch,gender,trait,survival) #data frame including all individuals out of both patches with the columns: patch, trait & survival
 
 
 ##### VECTORS #####
