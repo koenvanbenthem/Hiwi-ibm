@@ -33,7 +33,7 @@ N2<-abs(rnorm(1, mean=250, sd=10)) #patch 2 is drawn
  
 patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
 trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from both patches set as 5
-survival<-c(rep(1,N1),rep(1,N2)) #vector survival: is for all new individuals of both patches 1
+survival<-c(rep(2,N1),rep(2,N2)) #vector survival: is for all new individuals of both patches 1
   
 pop<-data.frame(patch,trait,survival) #data frame including all individuals out of both patches with the columns: patch, trait & survival
 
@@ -78,6 +78,7 @@ for(t in 2:Nt){
 
   ##### DEATH #####
   pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
+  pop$survival[(N+1):nrow(pop)]<-5
   pop <-subset(pop,pop$survival>0)
 
   ##### END DEATH #####
