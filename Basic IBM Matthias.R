@@ -5,6 +5,7 @@ rm(list=ls())
 replic<-2 #replicates
 Nt<-10 #generations
 mig <- 0.05 #migrationfactor
+max.Age<-2 # age limit
 
 #fecundity
 a <-  0.49649467
@@ -33,7 +34,7 @@ N2<-abs(rnorm(1, mean=250, sd=10)) #patch 2 is drawn
  
 patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
 trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all indicviduals from both patches set as 5
-survival<-c(rep(2,N1),rep(2,N2)) #vector survival: is for all new individuals of both patches 1
+survival<-c(rep(max.Age,N1),rep(max.Age,N2)) #vector survival: is for all new individuals of both patches 1
   
 pop<-data.frame(patch,trait,survival) #data frame including all individuals out of both patches with the columns: patch, trait & survival
 
@@ -78,7 +79,7 @@ for(t in 2:Nt){
 
   ##### DEATH #####
   pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
-  pop$survival[(N+1):nrow(pop)]<-5
+  pop$survival[(N+1):nrow(pop)]<-max.Age
   pop <-subset(pop,pop$survival>0)
 
   ##### END DEATH #####
@@ -125,7 +126,7 @@ for(t in 2:Nt){
 ##### PLOTS #####
 
 
-plot(pop.N1.vector, main="populationsize over the generations",xlab="generations",ylab="populationsize",type="l",col="darkorange3") #plot populationsize
+plot(pop.N1.vector, main="populationsize over the generations",xlab="generations",ylab="populationsize",type="l",col="darkorange3",ylim = c(min(pop.N1.vector),max(pop.N2.vector))) #plot populationsize
 lines(pop.N2.vector,type="l",col="green") #includes the populationsize of patch 2
 legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("darkorange3","green"))
 
