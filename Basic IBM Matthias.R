@@ -54,16 +54,14 @@ trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the fi
 for(r in 1:replic){
   
   pop <- round(N1) + round(N2) #number of individuals
-  loci <- matrix(NA,nrow=pop,ncol=20) #empty vector for the locis
-  for(p in 1:pop){ 
-    for(k in 1:20){
-      loci[p,k] <- round(runif(1,1,10))
-    }
+  loci <- matrix(NA,nrow=pop,ncol=20) #empty matrix for the locis
+  for(p in 1:pop){ #for each individual
+    loci[p,] <- round(runif(20,1,10)) #each individual has 20 random numbers (first 10:row //last 10:column)
   }
   
-  values <- matrix(NA,nrow=pop,ncol=10)
-  for(q in 1:pop){
-    for(r in 1:10){
+  values <- matrix(NA,nrow=pop,ncol=10) #empty matrix for the trait values for each loci
+  for(q in 1:pop){ #for each individual
+    for(r in 1:10){ 
       values[q,r] <- abs(sum(gen_phen_map[r,loci[q,r],loci[q,10+r]]))
     }
   }
