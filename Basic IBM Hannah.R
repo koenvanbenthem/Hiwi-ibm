@@ -179,6 +179,15 @@ for(r in 1:replic){
     
     ##### DEATH #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
+    #Graveyard<-rownames(subset(pop,pop$survival==0))
+    
+    for(v in 1:nrow(pop)){ #for each individual
+      if(pop$survival<=0){ #if the survival is 0, it replaces the first loci with -2
+        locis[v,1] <- -2
+      }
+    }
+    
+    locis <- subset(locis,locis[,1]>-2 ) #all rows with a -2 in the beginning are deleted
     pop <-subset(pop,pop$survival>0) #Individuals which have a survival higher then 0 stay alive in the dataframe
     ##### END DEATH #####
     
