@@ -94,7 +94,12 @@ for(r in 1:replic){
       Nchild <- rpois(nrow(N.w),w(a,b,N.w$trait,N.0,N.l[N.w$patch])) #each female gets a random number of offspring
     }
     
-    pop.new <- #empty matrix: children population
+    patch.children <- c(rep(0,nrow=sum(Nchild))) #empty vector for the patch
+    gender.children <- c(rep(0,nrow=sum(Nchild))) #empty vector for the gender
+    trait.children <- c(rep(0,nrow=sum(Nchild))) #empty vector for the trait
+    survival.children <- c(rep(max.age,nrow=sum(Nchild))) #each child gets the survival of the maximum age
+    pop.new <- data.frame(patch.children,gender.children,trait.children,survival.children)
+    
     loci.new <- matrix(NA,nrow=sum(Nchild),ncol=20) #empty matrix: children locis
     
     #### LOOP PARTNERFINDING #####
@@ -120,7 +125,16 @@ for(r in 1:replic){
               loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
             }
           } #end loop 10 locis
+          
+          #FILLS CHILDREN MATRIX
           loci.new[o,] <- loci.child #Loci of the child are written into the matrix for the children loci
+          pop.new[o,1] <- 1 #each child gets the patch 1
+          pop.new[o,3] <- abs(sum(loci.child)) #each child gets their traitvalue
+          if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
+            pop.new[o,2] <- "female"
+          } else{
+            pop.new[o,2] <- "male"
+          }
         } #end loop number children
       } #end females patch 1
     
@@ -147,12 +161,21 @@ for(r in 1:replic){
               loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
             }
           } #end loop 10 locis
-          loci.new[q,] <- loci.child #Loci of the child are written into the matrix for the children loci
+          
+          #FILLS CHILDREN MATRIX
+          loci.new[o+q,] <- loci.child #Loci of the child are written into the matrix for the children loci
+          pop.new[o+q,1] <- 2 #each child gets the patch 2
+          pop.new[o+q,3] <- abs(sum(loci.child)) #each child gets their traitvalue
+          if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
+            pop.new[o+q,2] <- "female"
+          } else{
+            pop.new[o+q,2] <- "male"
+          }
         } #end loop number children
       } #end females patch 2
-    } #END LOOP PARTNERFINDING
       
-    #pop<-pop[c(1:nrow(pop),Hera),] #adds the clons of the individuals the the population data frame
+    } #END LOOP PARTNERFINDING
+    pop<-pop[c(1:nrow(pop),pop.new),] #adds the children to the population data frame
     
     
     ##### DEATH #####
