@@ -139,7 +139,6 @@ for(r in 1:replic){
       } #end females patch 1
     
       
-      
       if(N.w[u]==pop$patch==2){ #FEMALES PATCH 2
         father <- sample(N2.m,size=1) #samples one individual out of the patch 
         
@@ -151,14 +150,14 @@ for(r in 1:replic){
         for(q in 1:Nchild[u]){ #for loop for the number of children per female
           for(s in 1:10){ #loop over the 10 locis
             if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-              loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
+              loci.child[q] <- loci.mother[q] #child gets the top allel (spot p) from mother
             } else{
-              loci.child[p] <- loci.mother[10+p] #child gets the bottom allel (spot 10+p) from mother
+              loci.child[q] <- loci.mother[10+q] #child gets the bottom allel (spot 10+p) from mother
             }
             if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-              loci.child[10+p] <- loci.father[p] #child gets the top allel (spot p) from father
+              loci.child[10+q] <- loci.father[q] #child gets the top allel (spot p) from father
             } else{
-              loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
+              loci.child[10+q] <- loci.father[10+q] #child gets the bottom allel (spot 10+p) from mother
             }
           } #end loop 10 locis
           
@@ -180,7 +179,7 @@ for(r in 1:replic){
     
     ##### DEATH #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
-    pop <-subset(pop,pop$survival>0)
+    pop <-subset(pop,pop$survival>0) #Individuals which have a survival higher then 0 stay alive in the dataframe
     ##### END DEATH #####
     
     
