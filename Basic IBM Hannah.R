@@ -120,6 +120,7 @@ for(r in 1:replic){
               loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
             }
           } #end loop 10 locis
+          loci.new[o,] <- loci.child #Loci of the child are written into the matrix for the children loci
         } #end loop number children
       } #end females patch 1
     
@@ -146,6 +147,7 @@ for(r in 1:replic){
               loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
             }
           } #end loop 10 locis
+          loci.new[q,] <- loci.child #Loci of the child are written into the matrix for the children loci
         } #end loop number children
       } #end females patch 2
     } #END LOOP PARTNERFINDING
@@ -169,7 +171,7 @@ for(r in 1:replic){
     migration<-c(mig.N1,mig.N2)
     pop$patch<-migration
     
-    chaos<-order(pop$patch)
+    chaos<-order(pop$patch) #orderd after patches
     pop<-pop[chaos,]
     
     
