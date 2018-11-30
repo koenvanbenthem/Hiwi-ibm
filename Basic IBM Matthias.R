@@ -109,17 +109,19 @@ for(r in 1:replic){
     
     #### LOOP PARTNERFINDING #####
     for(u in 1:nrow(N.w)){ #start loop
-      
+      mother<-N.w$ID[u] #gives the ID of the mother
       ##### FEMALES PATCH 1 #####
       if(N.w[u,2]<2){ ###==1    #USE OF COLUMN.NR
-        father <- sample(N1.m,size=1) #samples one individual out of the patch
-        
+        father <- sample(N1.m$ID,size=1) #samples one ID out of patch 1
+      }else{
+        father <- sample(N2.m$ID,size=1) #samples one ID out of patch 2
+      }
         #GENETICS PATCH 1:
-        loci.mother <- loci[nrow(N1.m)+u,] #vector of locis of the mother
-        loci.father <- loci[u,] #vector of locis of the father
+        loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
+        loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
         loci.child <- rep(0,ncol(loci)) #empty vector with fixed legth
         
-        for(o in 1:Nchild[u]){ #for loop for the number of children per female
+        for(o in 1:Nchild){ #for loop for the number of children per female
           for(p in 1:(10)){ #loop over the 10 locis
             if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
               loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
@@ -135,8 +137,8 @@ for(r in 1:replic){
           
           #FILLS CHILDREN MATRIX
           loci.new[o,] <- loci.child #Loci of the child are written into the matrix for the children loci
-          loci.child[o,21] <- (nrow(pop))+o #fills in the ID in the children loci matrix
-          pop.new[o,2] <- 1 #each child gets the patch 1
+          loci.child[21] <- (nrow(pop))+o #fills in the ID in the children loci matrix
+          pop.new[o,2] <- subset(pop,pop$ID==mother)[2] #each child gets the patch of the mother
           pop.new[o,4] <- abs(sum(loci.child[1:20])) #each child gets their traitvalue
           if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
             pop.new[o,3] <- "female"    #USE OF COLUMN.NR
@@ -146,7 +148,7 @@ for(r in 1:replic){
           pop.new[o,1] <- (nrow(pop))+o #USE OF COLUMN.NR #fills in the ID in the children pop matrix of the individual
         } #end loop number children
       } #end females patch 1
-      
+  } #Hopefully new end of PARTNERFINDING
       
       #### FEMALES PATCH 2 #####
       if(N.w[u,2]>1){  ###==2
