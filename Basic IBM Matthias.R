@@ -110,18 +110,18 @@ for(r in 1:replic){
     #### LOOP PARTNERFINDING #####
     for(u in 1:nrow(N.w)){ #start loop
       mother<-N.w$ID[u] #gives the ID of the mother
-      ##### FEMALES PATCH 1 #####
+      ###FATHER####
       if(N.w[u,2]<2){ ###==1    #USE OF COLUMN.NR
         father <- sample(N1.m$ID,size=1) #samples one ID out of patch 1
       }else{
         father <- sample(N2.m$ID,size=1) #samples one ID out of patch 2
       }
-        #GENETICS PATCH 1:
+        #GENETICS:
         loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
         loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
         loci.child <- rep(0,ncol(loci)) #empty vector with fixed legth
         
-        for(o in 1:Nchild){ #for loop for the number of children per female
+        for(o in 1:length(Nchild)){ #for loop for the number of children per female
           for(p in 1:(10)){ #loop over the 10 locis
             if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
               loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
@@ -147,54 +147,15 @@ for(r in 1:replic){
           }
           pop.new[o,1] <- (nrow(pop))+o #USE OF COLUMN.NR #fills in the ID in the children pop matrix of the individual
         } #end loop number children
-      } #end females patch 1
-  } #Hopefully new end of PARTNERFINDING
       
-      #### FEMALES PATCH 2 #####
-      if(N.w[u,2]>1){  ###==2
-        father <- sample(N2.m,size=1) #samples one individual out of the patch 
-        
-        #GENETICS PATCH 2:
-        loci.mother <- loci[nrow(N1.m)+nrow(N1.w)+nrow(N2.m)+u,] #vector of locis of the mother
-        loci.father <- loci[nrow(N1.m)+nrow(N1.w)+u,] #vector of locis of the father
-        loci.child <- rep(0,ncol(loci)) #emp?ty vector with fixed legth
-        
-        for(q in 1:Nchild[u]){ #for loop for the number of children per female
-          for(s in 1:10){ #loop over the 10 locis
-            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-              loci.child[q] <- loci.mother[q] #child gets the top allel (spot p) from mother
-            } else{
-              loci.child[q] <- loci.mother[10+q] #child gets the bottom allel (spot 10+p) from mother
-            }
-            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-              loci.child[10+q] <- loci.father[q] #child gets the top allel (spot p) from father
-            } else{
-              loci.child[10+q] <- loci.father[10+q] #child gets the bottom allel (spot 10+p) from mother
-            }
-            loci.child[21] <- (nrow(pop))+o
-          } #end loop 10 locis
-          
-          #FILLS CHILDREN MATRIX
-          loci.new[o+q,] <- loci.child #Loci of the child are written into the matrix for the children loci
-          loci.child[o+q,21] <- (nrow(pop))+o+q #fills in the ID in the children loci matrix
-          pop.new[o+q,2] <- 2 #each child gets the patch 2
-          pop.new[o+q,4] <- abs(sum(loci.child[1:20])) #each child gets their traitvalue
-          if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
-            pop.new[o+q,3] <- "female"    #USE OF COLUMN.NR
-          } else{
-            pop.new[o+q,3] <- "male"      #USE OF COLUMN.NR
-          }
-          pop.new[o+q,1] <- (nrow(pop))+o+q #USE OF COLUMN.NR #fills in the ID in the children pop matrix of the individual
-        } #end loop number children
-      } #end females patch 2
-      
+     
     } #END LOOP PARTNERFINDING
     pop<-pop[c(1:nrow(pop),pop.new),] #adds the children to the population data frame
     
     
     ##### DEATH #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
-    
+    pop$survival[N+1:nrow(pop)]<-max.Age # sets survival of the newborn
     for(v in 1:nrow(pop)){ #for each individual
       if(pop$survival<=0){ #if the survival is 0, it replaces the first loci with -2
         locis[v,1] <- -2
