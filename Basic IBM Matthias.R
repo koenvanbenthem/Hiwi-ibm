@@ -5,7 +5,7 @@ rm(list=ls())
 replic<-2 #replicates
 Nt<-10 #generations
 mig <- 0.05 #migrationfactor
-max.Age<-2 # age limit
+max.Age<-1 # age limit
 
 #fecundity
 a <-  0.49649467
@@ -71,7 +71,7 @@ for(r in 1:replic){
     for(z in 1:10){ 
       values[y,z] <- gen_phen_map[z,loci[y,z],loci[y,10+z]]
     }
-    pop[y,4] <- abs(sum(values[y,])) ##### USE OF NR
+    pop[y,4] <- abs(sum(values[y,])) ##### USE OF COLUMN.NR
   }
   
   
@@ -111,7 +111,7 @@ for(r in 1:replic){
     for(u in 1:nrow(N.w)){ #start loop
       
       ##### FEMALES PATCH 1 #####
-      if(N.w[u,2]<2){ ###==1
+      if(N.w[u,2]<2){ ###==1    #USE OF COLUMN.NR
         father <- sample(N1.m,size=1) #samples one individual out of the patch
         
         #GENETICS PATCH 1:
@@ -139,11 +139,11 @@ for(r in 1:replic){
           pop.new[o,2] <- 1 #each child gets the patch 1
           pop.new[o,4] <- abs(sum(loci.child[1:20])) #each child gets their traitvalue
           if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
-            pop.new[o,3] <- "female"
+            pop.new[o,3] <- "female"    #USE OF COLUMN.NR
           } else{
-            pop.new[o,3] <- "male"
+            pop.new[o,3] <- "male"      #USE OF COLUMN.NR
           }
-          pop.new[o,1] <- (nrow(pop))+o #fills in the ID in the children pop matrix of the individual
+          pop.new[o,1] <- (nrow(pop))+o #USE OF COLUMN.NR #fills in the ID in the children pop matrix of the individual
         } #end loop number children
       } #end females patch 1
       
@@ -155,7 +155,7 @@ for(r in 1:replic){
         #GENETICS PATCH 2:
         loci.mother <- loci[nrow(N1.m)+nrow(N1.w)+nrow(N2.m)+u,] #vector of locis of the mother
         loci.father <- loci[nrow(N1.m)+nrow(N1.w)+u,] #vector of locis of the father
-        loci.child <- rep(0,ncol(loci)) #empüty vector with fixed legth
+        loci.child <- rep(0,ncol(loci)) #emp?ty vector with fixed legth
         
         for(q in 1:Nchild[u]){ #for loop for the number of children per female
           for(s in 1:10){ #loop over the 10 locis
@@ -178,11 +178,11 @@ for(r in 1:replic){
           pop.new[o+q,2] <- 2 #each child gets the patch 2
           pop.new[o+q,4] <- abs(sum(loci.child[1:20])) #each child gets their traitvalue
           if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
-            pop.new[o+q,3] <- "female"
+            pop.new[o+q,3] <- "female"    #USE OF COLUMN.NR
           } else{
-            pop.new[o+q,3] <- "male"
+            pop.new[o+q,3] <- "male"      #USE OF COLUMN.NR
           }
-          pop.new[o+q,1] <- (nrow(pop))+o+q #fills in the ID in the children pop matrix of the individual
+          pop.new[o+q,1] <- (nrow(pop))+o+q #USE OF COLUMN.NR #fills in the ID in the children pop matrix of the individual
         } #end loop number children
       } #end females patch 2
       
@@ -213,12 +213,10 @@ for(r in 1:replic){
     
     migration<-c(mig.N1,mig.N2)
     pop$patch<-migration
-    
+
+    pop<-pop[chaos,]    
     chaos<-order(pop$patch) #orderd after patches
-    pop<-pop[chaos,]
     
-    
-    #### !!! ##### all individuals with a 1 need to migrate in the other patch #### !!! ####
     ##### MIGRATION END #####
     
     
