@@ -148,14 +148,17 @@ for(r in 1:replic){
           pop.new[o,1] <- (nrow(pop))+o #USE OF COLUMN.NR #fills in the ID in the children pop matrix of the individual
         } #end loop number children
       
-     
+       
     } #END LOOP PARTNERFINDING
-    pop<-pop[c(1:nrow(pop),pop.new),] #adds the children to the population data frame
+    colnames(pop.new)<-c("ID","patch","gender","trait","survival")
+    pop.new$survival<-max.Age # sets survival of the newborn
+    pop<-rbind(pop,pop.new)
+    rownames(pop) <- 1:nrow(pop)
+    # pop<-pop[c(1:nrow(pop),pop.new),] #adds the children to the population data frame
     
     
     ##### DEATH #####
-    pop$survival[1:N]<-pop$survival[1:N]-1 #survival set on 0
-    pop$survival[N+1:nrow(pop)]<-max.Age # sets survival of the newborn
+    pop$survival[1:N]<-pop$survival[1:N]-1 #every adult loses one survival counter
     for(v in 1:nrow(pop)){ #for each individual
       if(pop$survival<=0){ #if the survival is 0, it replaces the first loci with -2
         locis[v,1] <- -2
