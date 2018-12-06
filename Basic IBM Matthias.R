@@ -3,14 +3,16 @@ rm(list=ls())
 
 #USED INDIC######
 #   replication -r
+#   loci/traitv.-x,y,z    
 #   genertion   -t
 #   partner     -u
 #   gentics     -o,p
 #   survival    -v
+#   gender loop -g
 
 ##### PARAMETERS #####
-replic<-2 #replicates
-Nt<-10 #generations
+replic<-1 #replicates
+Nt<-1 #generations
 mig <- 0.05 #migrationfactor
 max.Age<-1 # age limit
 
@@ -105,74 +107,86 @@ for(r in 1:replic){
       Nchild <- rpois(nrow(N.w),w(a,b,N.w$trait,N.0,N.l[N.w$patch])) #each female gets a random number of offspring
     }
     
-    ID.children <- c(rep(0,nrow=sum(Nchild))) #empty vector for the ID
-    patch.children <- c(rep(0,nrow=sum(Nchild))) #empty vector for the patch
-    gender.children <- c(rep(0,nrow=sum(Nchild))) #empty vector for the gender
-    trait.children <- c(rep(0,nrow=sum(Nchild))) #empty vector for the trait
-    survival.children <- c(rep(max.Age,nrow=sum(Nchild))) #each child gets the survival of the maximum age
+    ID.children <- c(rep(0,sum(Nchild))) #empty vector for the ID
+    patch.children <- c(rep(0,sum(Nchild))) #empty vector for the patch
+    gender.children <- c(rep(0,sum(Nchild))) #empty vector for the gender
+    trait.children <- c(rep(0,sum(Nchild))) #empty vector for the trait
+    survival.children <- c(rep(max.Age,sum(Nchild))) #each child gets the survival of the maximum age
     pop.new <- data.frame(ID.children,patch.children,gender.children,trait.children,survival.children)
     
-    loci.new <- matrix(NA,nrow=sum(Nchild),ncol=21) #empty matrix: children locis
+    loci.new <- c() #empty vector: children locis
     
-    #### LOOP PARTNERFINDING #####
-    for(u in 1:nrow(N.w)){ #start loop
-      mother<-N.w$ID[u] #gives the ID of the mother
-      ###FATHER####
-      if(N.w[u,2]<2){ ###==1    #USE OF COLUMN.NR
-        father <- sample(N1.m$ID,size=1) #samples one ID out of patch 1
-      }else{
-        father <- sample(N2.m$ID,size=1) #samples one ID out of patch 2
-      }
-        #GENETICS:
-        loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
-        loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
-        loci.child <- rep(0,ncol(loci)) #empty vector with fixed legth
+    #### START LOOP PARTNERFINDING #####
+    patchbook <- c()
+    gendergram <- c()
+    
+    for(u in 1:nrow(N.w)){ #loop mother 
+      if(Nchild[u]>0){ #just if the mother becomes offspring
+        mother<-N.w$ID[u] #gives the ID of the mother
         
-        for(o in 1:Nchild[u]){ #for loop for the number of children per female
-          for(p in 1:(10)){ #loop over the 10 locis
-            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-              loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
-            } else{
-              loci.child[p] <- loci.mother[10+p] #child gets the bottom allel (spot 10+p) from mother
-            }
-            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-              loci.child[10+p] <- loci.father[10+p] #child gets the top allel (spot p) from father
-            } else{
-              loci.child[10+p] <- loci.father[p] #child gets the bottom allel (spot 10+p) from mother
-            }
-          } #end loop 10 locis
+        ###FATHER####
+        if(N.w[u,2]<2){ ###==1    #USE OF COLUMN.NR
+          father <- sample(N1.m$ID,size=1) #samples one ID out of patch 1
+        }else{
+          father <- sample(N2.m$ID,size=1) #samples one ID out of patch 2
+        }
+        
+          #GENETICS:
+          loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
+          loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
+          loci.child <- rep(0,ncol(loci)) #empty vector with fixed length
           
-          #FILLS CHILDREN MATRIX
-          loci.new[o,] <- loci.child #Loci of the child are written into the matrix for the children loci
-          loci.child[21] <- (nrow(pop))+o #fills in the ID in the children loci matrix
-          pop.new[o,2] <- subset(pop,pop$ID==mother)[2] #each child gets the patch of the mother
-          pop.new[o,4] <- abs(sum(loci.child[1:20])) #each child gets their traitvalue
-          if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
-            pop.new[o,3] <- "female"    #USE OF COLUMN.NR
-          } else{
-            pop.new[o,3] <- "male"      #USE OF COLUMN.NR
-          }
-          pop.new[o,1] <- (nrow(pop))+o #USE OF COLUMN.NR #fills in the ID in the children pop matrix of the individual
-        } #end loop number children
-      
-       
-    } #END LOOP PARTNERFINDING
-    colnames(pop.new)<-c("ID","patch","gender","trait","survival")
-    pop.new$survival<-max.Age # sets survival of the newborn
+          for(o in 1:Nchild[u]){ #for loop for the number of children per female
+            for(p in 1:(10)){ #loop over the 10 locis
+              if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
+                loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
+              } else{
+                loci.child[p] <- loci.mother[10+p] #child gets the bottom allel (spot 10+p) from mother
+              }
+              if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
+                loci.child[10+p] <- loci.father[p] #child gets the top allel (spot p) from father
+              } else{
+                loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
+              }
+            } #end loop 10 locis
+            loci.new <-  rbind(loci.new,loci.child) #connects loci of the child to the matrix of the other children
+          
+            if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
+              gendergram <- c(gendergram,"female")  
+            } else{ #it is male
+              gendergram <- c(gendergram,"male")     
+            }
+        } #END LOOP NUMBER CHILDREN
+        patchbook <- c(patchbook, rep(subset(pop,pop$ID==mother)[2],Nchild[u])) #each kid gets the patch of the mother
+      }
+    } #END LOOP PARTNERFINDING/mother
+    
+    pop.new$gender.children <- gendergram #gender of the children are written into the matrix
+    pop.new$patch.children <- patchbook #patches of children are written into the matrix
+    colnames(pop.new)<-c("ID","patch","gender","trait","survival") #colum names
+    
+    values.new <- matrix(NA,nrow=sum(Nchild),ncol=10) #empty matrix for the trait values for each loci
+    for(d in 1:sum(Nchild)){ #for each individual offspring
+      for(f in 1:10){ 
+        values.new[d,f] <- gen_phen_map[f,loci[d,f],loci[d,10+f]]
+      }
+      pop.new[d,4] <- abs(sum(values.new[d,])) ##### USE OF COLUMN.NR
+    }
+    
+    
     pop<-rbind(pop,pop.new)
     rownames(pop) <- 1:nrow(pop)
-    # pop<-pop[c(1:nrow(pop),pop.new),] #adds the children to the population data frame
     
     
-    ##### DEATH #####
+    ##### DEATH START #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #every adult loses one survival counter
     for(v in 1:nrow(pop)){ #for each individual
       if(pop$survival<=0){ #if the survival is 0, it replaces the first loci with -2
-        locis[v,1] <- -2
+        loci[v,1] <- -2
       }
     }
     
-    locis <- subset(locis,locis[,1]>-2 ) #all rows with a -2 in the beginning are deleted
+    loci <- subset(loci,loci[,1]>-2 ) #all rows with a -2 in the beginning are deleted
     pop <-subset(pop,pop$survival>0) #Individuals which have a survival higher then 0 stay alive in the dataframe
     ##### END DEATH #####
     
@@ -189,7 +203,6 @@ for(r in 1:replic){
 
     pop<-pop[chaos,]    
     chaos<-order(pop$patch) #orderd after patches
-    
     ##### MIGRATION END #####
     
     
@@ -200,7 +213,7 @@ for(r in 1:replic){
     trait.N2.vector[t] <- mean(pop$trait[pop$patch==2]) #overwrites the average trait-value for each generation in the empty vector (patch 2)
     
     
-    rownames(pop) <- 1:nrow(pop)        #re-indexing the population to prevent 1.1.3.2.4.....
+    rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
   } 
   pop$ID<-c(1:nrow(pop))#new ID for the population
   loci[,21]<-c(1:nrow(pop))#new ID for the loci
