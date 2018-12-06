@@ -131,31 +131,31 @@ for(r in 1:replic){
           father <- sample(N2.m$ID,size=1) #samples one ID out of patch 2
         }
         
-          #GENETICS:
-          loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
-          loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
-          loci.child <- rep(0,ncol(loci)) #empty vector with fixed length
-          
-          for(o in 1:Nchild[u]){ #for loop for the number of children per female
-            for(p in 1:(10)){ #loop over the 10 locis
-              if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-                loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
-              } else{
-                loci.child[p] <- loci.mother[10+p] #child gets the bottom allel (spot 10+p) from mother
-              }
-              if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-                loci.child[10+p] <- loci.father[p] #child gets the top allel (spot p) from father
-              } else{
-                loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
-              }
-            } #end loop 10 locis
-            loci.new <-  rbind(loci.new,loci.child) #connects loci of the child to the matrix of the other children
-          
-            if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
-              gendergram <- c(gendergram,"female")  
-            } else{ #it is male
-              gendergram <- c(gendergram,"male")     
+        #GENETICS:
+        loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
+        loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
+        loci.child <- rep(0,ncol(loci)) #empty vector with fixed length
+        
+        for(o in 1:Nchild[u]){ #for loop for the number of children per female
+          for(p in 1:(10)){ #loop over the 10 locis
+            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
+              loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
+            } else{
+              loci.child[p] <- loci.mother[10+p] #child gets the bottom allel (spot 10+p) from mother
             }
+            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
+              loci.child[10+p] <- loci.father[p] #child gets the top allel (spot p) from father
+            } else{
+              loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
+            }
+          } #end loop 10 locis
+          loci.new <-  rbind(loci.new,loci.child) #connects loci of the child to the matrix of the other children
+          
+          if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
+            gendergram <- c(gendergram,"female")  
+          } else{ #it is male
+            gendergram <- c(gendergram,"male")     
+          }
         } #END LOOP NUMBER CHILDREN
         patchbook <- c(patchbook, rep(subset(pop,pop$ID==mother)[2],Nchild[u])) #each kid gets the patch of the mother
       }
@@ -200,7 +200,7 @@ for(r in 1:replic){
     
     migration<-c(mig.N1,mig.N2)
     pop$patch<-migration
-
+    
     pop<-pop[chaos,]    
     chaos<-order(pop$patch) #orderd after patches
     ##### MIGRATION END #####
