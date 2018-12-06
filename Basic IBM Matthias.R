@@ -1,6 +1,13 @@
 #Basic IBM
 rm(list=ls())
 
+#USED INDIC######
+#   replication -r
+#   genertion   -t
+#   partner     -u
+#   gentics     -o
+#   survival    -v
+
 ##### PARAMETERS #####
 replic<-2 #replicates
 Nt<-10 #generations
@@ -195,6 +202,8 @@ for(r in 1:replic){
     
     rownames(pop) <- 1:nrow(pop)        #re-indexing the population to prevent 1.1.3.2.4.....
   } 
+  pop$ID<-c(1:nrow(pop))#new ID for the population
+  loci[,21]<-c(1:nrow(pop))#new ID for the loci
   ##### GENERATION LOOP END #####
   
   #pdf(paste("graph",r,".pdf",sep=""))
