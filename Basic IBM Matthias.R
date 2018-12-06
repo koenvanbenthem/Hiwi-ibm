@@ -1,5 +1,5 @@
 #Basic IBM
-rm(list=ls())
+#rm(list=ls())
 
 #USED INDIC######
 #   replication -r
@@ -176,17 +176,17 @@ for(r in 1:replic){
     
     pop<-rbind(pop,pop.new)
     rownames(pop) <- 1:nrow(pop)
-    
+    loci<-rbind(loci,loci.new)
     
     ##### DEATH START #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #every adult loses one survival counter
     for(v in 1:nrow(pop)){ #for each individual
-      if(pop$survival<=0){ #if the survival is 0, it replaces the first loci with -2
+      if(pop[v,5]==0){ #if the survival is 0, it replaces the first loci with -2
         loci[v,1] <- -2
       }
     }
     
-    loci <- subset(loci,loci[,1]>-2 ) #all rows with a -2 in the beginning are deleted
+    loci <- subset(loci,loci[,1]>(-2 )) #all rows with a -2 in the beginning are deleted
     pop <-subset(pop,pop$survival>0) #Individuals which have a survival higher then 0 stay alive in the dataframe
     ##### END DEATH #####
     
@@ -201,23 +201,30 @@ for(r in 1:replic){
     migration<-c(mig.N1,mig.N2)
     pop$patch<-migration
 
-    pop<-pop[chaos,]    
-    chaos<-order(pop$patch) #orderd after patches
+    pop$ID<-c(1:nrow(pop))#new ID for the population
+    rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
+    loci[,21]<-c(1:nrow(pop))#new ID for the loci
+    chaos<-order(pop$patch) #vector of indices to orderd after patches
+    pop<-pop[chaos,] #order the pop matrix
+   
+    
+    sorting <- c() #
+    for(h in 1:nrow(pop)){
+      sorting <- rbind(sorting, subset(loci,loci[21]==pop[h,1]))
+    }
+    loci <- sorting
+    
+    rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
+    pop$ID<-c(1:nrow(pop))#new ID for the population
+    loci[,21]<-c(1:nrow(pop))#new ID for the loci
     ##### MIGRATION END #####
     
     
-    pop.N1.vector[t] <-sum(pop$patch==1) #overwrites the populationsizes for each generation in the empty vector (patch 1)
-    pop.N2.vector[t] <-sum(pop$patch==2) #overwrites the average trait-value for each generation in the empty vector (patch 2)
-    
-    trait.N1.vector[t] <- mean(pop$trait[pop$patch==1]) #overwrites the average trait-value for each generation in the empty vector (patch 1)
-    trait.N2.vector[t] <- mean(pop$trait[pop$patch==2]) #overwrites the average trait-value for each generation in the empty vector (patch 2)
-    
-    
-    rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
-  } 
-  pop$ID<-c(1:nrow(pop))#new ID for the population
-  loci[,21]<-c(1:nrow(pop))#new ID for the loci
-  ##### GENERATION LOOP END #####
+    #pop.N1.vector[t] <-sum(pop$patch==1) #overwrites the populationsizes for each generation in the empty vector (patch 1)
+    #pop.N2.vector[t] <-sum(pop$patch==2) #overwrites the average trait-value for each generation in the empty vector (patch 2)
+    #trait.N1.vector[t] <- mean(pop$trait[pop$patch==1]) #overwrites the average trait-value for each generation in the empty vector (patch 1)
+    #trait.N2.vector[t] <- mean(pop$trait[pop$patch==2]) #overwrites the average trait-value for each generation in the empty vector (patch 2)
+  } ##### GENERATION LOOP END #####
   
   #pdf(paste("graph",r,".pdf",sep=""))
   #plot(pop.N1.vector, main="populationsize over the generations",xlab="generations",ylab="populationsize",type="l",col="darkorange3") #plot populationsize
@@ -231,7 +238,7 @@ for(r in 1:replic){
 
 ##### PLOTS #####
 
-plot(trait.N1.vector,main="average trait-value over the generations", xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
-lines(trait.N2.vector,type="l",col="blue") #includes the average trait-value of patch 2
-legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
+#plot(trait.N1.vector,main="average trait-value over the generations", xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
+#lines(trait.N2.vector,type="l",col="blue") #includes the average trait-value of patch 2
+#legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
 
