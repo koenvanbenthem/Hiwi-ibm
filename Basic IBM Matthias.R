@@ -5,7 +5,7 @@ rm(list=ls())
 #   replication -r
 #   genertion   -t
 #   partner     -u
-#   gentics     -o
+#   gentics     -o,p
 #   survival    -v
 
 ##### PARAMETERS #####
@@ -128,7 +128,7 @@ for(r in 1:replic){
         loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
         loci.child <- rep(0,ncol(loci)) #empty vector with fixed legth
         
-        for(o in 1:length(Nchild)){ #for loop for the number of children per female
+        for(o in 1:Nchild[u]){ #for loop for the number of children per female
           for(p in 1:(10)){ #loop over the 10 locis
             if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
               loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
@@ -136,9 +136,9 @@ for(r in 1:replic){
               loci.child[p] <- loci.mother[10+p] #child gets the bottom allel (spot 10+p) from mother
             }
             if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-              loci.child[10+p] <- loci.father[p] #child gets the top allel (spot p) from father
+              loci.child[10+p] <- loci.father[10+p] #child gets the top allel (spot p) from father
             } else{
-              loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
+              loci.child[10+p] <- loci.father[p] #child gets the bottom allel (spot 10+p) from mother
             }
           } #end loop 10 locis
           
