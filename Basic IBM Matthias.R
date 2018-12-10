@@ -9,13 +9,16 @@
 #   gentics     -o,p
 #   survival    -v
 #   gender loop -g
-
+#   patches     -k
+#   values      -d,f
+#   offspring   -j
+#   migration   -b
 ##### PARAMETERS #####
 replic<-1 #replicates
 Nt<-1 #generations
 mig <- 0.05 #migrationfactor
 max.Age<-1 # age limit
-
+patches<-3 # Number of Patches
 #fecundity
 a <-  0.49649467
 b  <-  1.47718931
@@ -38,20 +41,25 @@ w<-function(a,b,z,N,Np){
 
 
 ##### PATCHES #####
-N1<-abs(round(rnorm(1, mean=250, sd=10))) #patch 1 is drawn 
-N2<-abs(round(rnorm(1, mean=250, sd=10))) #patch 2 is drawn
-N1.m<-round(runif(1,N1/4,3*N1/4)) #males in patch 1
-N2.m<-round(runif(1,N1/4,3*N1/4)) #males in patch 2
+pop<-c()
+for(k in 1:patches){
 
-ID <- c(1:(N1+N2)) #vector ID: gives each individual an ID
-patch<-c(rep(1,N1),rep(2,N2)) #vector patch: is filled with patch 1 (=1) and patch 2 (=2)
-gender<-c(rep("male",N1.m),rep("female",N1-N1.m),rep("male",N2.m),rep("female",N2-N2.m)) #vector gender: is filled with males and females
-trait<-c(rep(0.5,N1),rep(0.5,N2)) #vector trait: is for all individuals from both patches set as 5
-survival<-c(rep(max.Age,N1),rep(max.Age,N2)) #vector survival: is for all new individuals of both patches 1
+N_patchx<-abs(round(rnorm(1, mean=250, sd=10))) #Number of individuals in the patch 
 
-pop<-data.frame(ID,patch,gender,trait,survival) #data frame including all individuals out of both patches with the columns: patch, trait & survival
+patchx_m<-round(runif(1,N_patchx/4,3*N_patchx/4)) #Number of males in the patch
 
+ID <- c(1:(N_patchx)) #vector ID: gives each individual an ID
+patch<-c(rep(k,N_patchx)) #vector patch: gives each individual their patch Nr.
+gender<-c(rep("male",patchx_m),rep("female",N_patchx-patchx_m)) #vector gender: is filled with males and females
+trait<-c(rep(0.5,N_patchx)) #vector trait: is for all individuals from both patches set as 5
+survival<-c(rep(max.Age,N_patchx)) #vector survival: is for all new individuals of both patches 1
 
+patchx<-data.frame(ID,patch,gender,trait,survival)
+pop<-rbind(pop,patchx)  #data frame including all individuals of all patches
+}
+
+pop$ID<-c(1:nrow(pop))#new ID for the population
+home<-c(1:patches)
 ##### VECTORS #####
 pop.N1.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
 pop.N2.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 2
@@ -67,8 +75,8 @@ trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the fi
 ##### REPLICATION LOOP START#####
 
 for(r in 1:replic){
-  
-  population <- round(N1) + round(N2) #number of individuals
+
+  population <- nrow(pop) #number of individuals
   loci <- matrix(NA,nrow=population,ncol=20+1) #empty matrix for the locis
   for(x in 1:population){ #for each individual
     loci[x,] <- round(runif(21,1,10)) #each individual has 20 random numbers (first 10:row //last 10:column)
@@ -86,25 +94,21 @@ for(r in 1:replic){
   
   ##### GENERATION LOOP START #####  
   for(t in 2:Nt){
-    N1<-nrow(subset(pop,pop$patch==1)) #N1 is every generation overwritten to keep updated 
-    N2<-nrow(subset(pop,pop$patch==2)) #N2 is every generation overwritten to keep updated
     N<-c(nrow(pop)) #how many individuals there are in both patches
-    
-    
+    N.x<-c()
     ##### MATRICES #####
     N.w <- subset(pop,pop$gender=="female") #female individuals in total
-    N1.w <- subset(pop,pop$gender=="female"&pop$patch==1) #female individuals from patch 1
-    N2.w <- subset(pop,pop$gender=="female"&pop$patch==2) #female individuals from patch 2
-    N1.m <- subset(pop,pop$gender=="male"&pop$patch==1) #male individuals from patch 1
-    N2.m <- subset(pop,pop$gender=="male"&pop$patch==2) #male individuals from patch 
-    
+    N.m<- subset(pop,pop$gender=="male") #male individuals in total
     
     ##### OFFSPRING #####
     N.0<-N/500
-    N.l <- c(N1/500,N2/500) # vector of local population sizes
+    for(j in 1:patches){
+      N.x<-c(N.x,nrow(subset(pop,pop$patch==j))/500)
+    }
+    # vector of local population sizes
     
     if(nrow(N.w)>0){ #number of offspring per female
-      Nchild <- rpois(nrow(N.w),w(a,b,N.w$trait,N.0,N.l[N.w$patch])) #each female gets a random number of offspring
+      Nchild <- rpois(nrow(N.w),w(a,b,N.w$trait,N.0,N.x[N.w$patch])) #each female gets a random number of offspring
     }
     
     ID.children <- c(rep(0,sum(Nchild))) #empty vector for the ID
@@ -125,11 +129,7 @@ for(r in 1:replic){
         mother<-N.w$ID[u] #gives the ID of the mother
         
         ###FATHER####
-        if(N.w[u,2]<2){ ###==1    #USE OF COLUMN.NR
-          father <- sample(N1.m$ID,size=1) #samples one ID out of patch 1
-        }else{
-          father <- sample(N2.m$ID,size=1) #samples one ID out of patch 2
-        }
+        father<-sample(subset(N.m$ID,N.m$patch==subset(N.w$patch,N.w$ID==mother)),1)# sample the ID of one male which patchnr. is the same as the patchnr. of the mother
         
         #GENETICS:
         loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
@@ -192,14 +192,12 @@ for(r in 1:replic){
     
     
     ##### MIGRATION START #####
-    mig.N1 <- runif(nrow((subset(pop,pop$patch==1))),0,1) #draws so many uniformmly distributed numbers as there are individuals in patch 1
-    mig.N2 <- runif(nrow((subset(pop,pop$patch==2))),0,1) #draws so many uniformmly distributed numbers as there are individuals in patch 2
-    
-    mig.N1 <- ifelse(mig.N1>mig,1,2) #the individuals with a random number lower then the migration rate get the value 2 (migrates to patch 2) & and the ones higher as the migration rate get the value 1 (dont migrate, stay in patch 1)
-    mig.N2 <- ifelse(mig.N2>mig,2,1) #the individuals with a random number lower then the migration rate get the value 1 (migrate to patch 1) & and the ones higher as the migration rate get the value 2 (dont migrate,stay in patch 2)
-    
-    migration<-c(mig.N1,mig.N2)
-    pop$patch<-migration
+    wanderlust<-runif(nrow(pop),0,1)# draws one uniformmly distribued number for every individual
+    for(b in 1:length(wanderlust)){
+      if(wanderlust[b]>mig){
+        pop$patch[b]<-sample(home[-(pop$patch[b])],1)#samples one patchnr. out of a vector of patchnr. with the exception of the individuals own patch
+      }
+    }
     
     pop$ID<-c(1:nrow(pop))#new ID for the population
     rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
