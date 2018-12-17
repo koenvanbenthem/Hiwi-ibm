@@ -1,6 +1,6 @@
 #Basic IBM
-#rm(list=ls())
-
+rm(list=ls())
+source('C:/Users/Leron/Desktop/IBM_code/Gene_generator.R')
 #USED INDIC######
 #   replication -r
 #   loci/traitv.-x,y,z    
@@ -12,13 +12,13 @@
 #   patches     -k
 #   values      -d,f
 #   offspring   -j
-#   migration   -b
+#   migration   -g
 ##### PARAMETERS #####
 replic<-1 #replicates
-Nt<-1 #generations
+Nt<-100 #generations
 mig <- 0.05 #migrationfactor
 max.Age<-1 # age limit
-patches<-3 # Number of Patches
+patches<-2 # Number of Patches
 #fecundity
 a <-  0.49649467
 b  <-  1.47718931
@@ -59,17 +59,17 @@ pop<-rbind(pop,patchx)  #data frame including all individuals of all patches
 }
 
 pop$ID<-c(1:nrow(pop))#new ID for the population
-home<-c(1:patches)
+home<-c(1:patches)#vector of patchnr.
 ##### VECTORS #####
-pop.N1.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
-pop.N2.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 2
-trait.N1.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 1
-trait.N2.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 2
+#pop.N1.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
+#pop.N2.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 2
+#trait.N1.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 1
+#trait.N2.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 2
 
-pop.N1.vector[1] <- N1 #populationsize for the first generation of patch 1
-pop.N2.vector[1] <- N2 #populationsize for the first generation of patch 2
-trait.N1.vector <- mean(pop$trait[pop$patch==1]) #average trait-value for the first generation of patch 1
-trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the first generation of patch 2
+#pop.N1.vector[1] <- N1 #populationsize for the first generation of patch 1
+#pop.N2.vector[1] <- N2 #populationsize for the first generation of patch 2
+#trait.N1.vector <- mean(pop$trait[pop$patch==1]) #average trait-value for the first generation of patch 1
+#trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the first generation of patch 2
 
 
 ##### REPLICATION LOOP START#####
@@ -93,7 +93,11 @@ for(r in 1:replic){
   
   
   ##### GENERATION LOOP START #####  
-  for(t in 2:Nt){
+  for(t in 1:Nt){
+    ######IS ANYBODY THERE? START##############
+    if(nrow(pop)>0){
+      
+      
     N<-c(nrow(pop)) #how many individuals there are in both patches
     N.x<-c()
     ##### MATRICES #####
@@ -129,8 +133,8 @@ for(r in 1:replic){
         mother<-N.w$ID[u] #gives the ID of the mother
         
         ###FATHER####
-        father<-sample(subset(N.m$ID,N.m$patch==subset(N.w$patch,N.w$ID==mother)),1)# sample the ID of one male which patchnr. is the same as the patchnr. of the mother
-        
+        # sample the ID of one male which patchnr. is the same as the patchnr. of the mother
+        father<-sample(subset(N.m$ID,N.m$patch==subset(N.w$patch,N.w$ID==mother)),1)
         #GENETICS:
         loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
         loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
@@ -193,26 +197,17 @@ for(r in 1:replic){
     
     ##### MIGRATION START #####
     wanderlust<-runif(nrow(pop),0,1)# draws one uniformmly distribued number for every individual
-    for(b in 1:length(wanderlust)){
-      if(wanderlust[b]>mig){
-        pop$patch[b]<-sample(home[-(pop$patch[b])],1)#samples one patchnr. out of a vector of patchnr. with the exception of the individuals own patch
+    new.patch<-c()
+    for(g in 1:length(wanderlust)){#for every individual
+      if(wanderlust[g]<mig){#if wanderlust is lower than mig sample one patchnumber out of a vector of patchnr. other than your own
+        new.patch<-c(new.patch,sample(subset(home,home!=(pop$patch[g])),1),recursive=TRUE)#samples one patchnr. out of a vector of patchnr. with the exception of the individuals own patch
+      }else{# if mig is higher than wanderlust just put in your own patchnr.
+        new.patch<-c(new.patch,pop$patch[g],recursive=TRUE)
       }
-    }
+          }
+    pop$patch<-new.patch#override the vector in the population
     
-    pop$ID<-c(1:nrow(pop))#new ID for the population
-    rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
-    loci[,21]<-c(1:nrow(pop))#new ID for the loci
-    chaos<-order(pop$patch) #vector of indices to orderd after patches
-    pop<-pop[chaos,] #order the pop matrix
-    
-    
-    sorting <- c() #
-    for(h in 1:nrow(pop)){
-      sorting <- rbind(sorting, subset(loci,loci[21]==pop[h,1]))
-    }
-    loci <- sorting
-    
-    rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
+    rownames(pop) <- 1:nrow(pop) #re-indexing the population
     pop$ID<-c(1:nrow(pop))#new ID for the population
     loci[,21]<-c(1:nrow(pop))#new ID for the loci
     ##### MIGRATION END #####
@@ -222,7 +217,8 @@ for(r in 1:replic){
     #pop.N2.vector[t] <-sum(pop$patch==2) #overwrites the average trait-value for each generation in the empty vector (patch 2)
     #trait.N1.vector[t] <- mean(pop$trait[pop$patch==1]) #overwrites the average trait-value for each generation in the empty vector (patch 1)
     #trait.N2.vector[t] <- mean(pop$trait[pop$patch==2]) #overwrites the average trait-value for each generation in the empty vector (patch 2)
-  } ##### GENERATION LOOP END #####
+    }### IS ANYBODY THERE? END ######
+    } ##### GENERATION LOOP END #####
   
   #pdf(paste("graph",r,".pdf",sep=""))
   #plot(pop.N1.vector, main="populationsize over the generations",xlab="generations",ylab="populationsize",type="l",col="darkorange3") #plot populationsize
@@ -239,3 +235,20 @@ for(r in 1:replic){
 #plot(trait.N1.vector,main="average trait-value over the generations", xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
 #lines(trait.N2.vector,type="l",col="blue") #includes the average trait-value of patch 2
 #legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
+
+
+
+#######Order######
+pop$ID<-c(1:nrow(pop))#new ID for the population
+rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
+loci[,21]<-c(1:nrow(pop))#new ID for the loci
+chaos<-order(pop$patch) #vector of indices to orderd after patches
+pop<-pop[chaos,] #order the pop matrix
+
+
+sorting <- c() #
+for(h in 1:nrow(pop)){
+  sorting <- rbind(sorting, subset(loci,loci[21]==pop[h,1]))
+}
+loci <- sorting
+
