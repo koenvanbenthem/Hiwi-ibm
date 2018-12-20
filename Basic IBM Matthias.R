@@ -37,6 +37,18 @@ w<-function(a,b,z,N,Np){
 }
 
 
+f <- function(row,pop.matrix,value.matrix,loci.matrix){
+  value.matrix <- matrix(NA,nrow=row,ncol=10) #empty matrix for the trait values for each loci
+  for(y in 1:row){ #for each individual
+    for(z in 1:10){ 
+      value.matrix[y,z] <- gen_phen_map[z,loci.matrix[y,z],loci.matrix[y,10+z]]
+    }
+    pop.matrix[y,4] <- abs(sum(value.matrix[y,])) ##### USE OF COLUMN.NR
+  }
+  return(pop.matrix)
+}
+
+
 ##### PATCHES #####
 N1<-abs(round(rnorm(1, mean=250, sd=10))) #patch 1 is drawn 
 N2<-abs(round(rnorm(1, mean=250, sd=10))) #patch 2 is drawn
@@ -75,13 +87,9 @@ for(r in 1:replic){
     loci[x,21] <- x
   }
   
-  values <- matrix(NA,nrow=population,ncol=10) #empty matrix for the trait values for each loci
-  for(y in 1:population){ #for each individual
-    for(z in 1:10){ 
-      values[y,z] <- gen_phen_map[z,loci[y,z],loci[y,10+z]]
-    }
-    pop[y,4] <- abs(sum(values[y,])) ##### USE OF COLUMN.NR
-  }
+  
+  f(population, pop, values, loci)
+  
   
   
   ##### GENERATION LOOP START #####  
@@ -131,31 +139,31 @@ for(r in 1:replic){
           father <- sample(N2.m$ID,size=1) #samples one ID out of patch 2
         }
         
-          #GENETICS:
-          loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
-          loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
-          loci.child <- rep(0,ncol(loci)) #empty vector with fixed length
-          
-          for(o in 1:Nchild[u]){ #for loop for the number of children per female
-            for(p in 1:(10)){ #loop over the 10 locis
-              if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-                loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
-              } else{
-                loci.child[p] <- loci.mother[10+p] #child gets the bottom allel (spot 10+p) from mother
-              }
-              if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-                loci.child[10+p] <- loci.father[p] #child gets the top allel (spot p) from father
-              } else{
-                loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
-              }
-            } #end loop 10 locis
-            loci.new <-  rbind(loci.new,loci.child) #connects loci of the child to the matrix of the other children
-          
-            if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
-              gendergram <- c(gendergram,"female")  
-            } else{ #it is male
-              gendergram <- c(gendergram,"male")     
+        #GENETICS:
+        loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
+        loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
+        loci.child <- rep(0,ncol(loci)) #empty vector with fixed length
+        
+        for(o in 1:Nchild[u]){ #for loop for the number of children per female
+          for(p in 1:(10)){ #loop over the 10 locis
+            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
+              loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
+            } else{
+              loci.child[p] <- loci.mother[10+p] #child gets the bottom allel (spot 10+p) from mother
             }
+            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
+              loci.child[10+p] <- loci.father[p] #child gets the top allel (spot p) from father
+            } else{
+              loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
+            }
+          } #end loop 10 locis
+          loci.new <-  rbind(loci.new,loci.child) #connects loci of the child to the matrix of the other children
+          
+          if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
+            gendergram <- c(gendergram,"female")  
+          } else{ #it is male
+            gendergram <- c(gendergram,"male")     
+          }
         } #END LOOP NUMBER CHILDREN
         patchbook <- c(patchbook, rep(subset(pop,pop$ID==mother)[2],Nchild[u])) #each kid gets the patch of the mother
       }
@@ -165,13 +173,8 @@ for(r in 1:replic){
     pop.new$patch.children <- patchbook #patches of children are written into the matrix
     colnames(pop.new)<-c("ID","patch","gender","trait","survival") #colum names
     
-    values.new <- matrix(NA,nrow=sum(Nchild),ncol=10) #empty matrix for the trait values for each loci
-    for(d in 1:sum(Nchild)){ #for each individual offspring
-      for(f in 1:10){ 
-        values.new[d,f] <- gen_phen_map[f,loci[d,f],loci[d,10+f]]
-      }
-      pop.new[d,4] <- abs(sum(values.new[d,])) ##### USE OF COLUMN.NR
-    }
+    
+    f(sum(Nchild), pop.new, values.new, loci)
     
     
     pop<-rbind(pop,pop.new)
@@ -200,13 +203,13 @@ for(r in 1:replic){
     
     migration<-c(mig.N1,mig.N2)
     pop$patch<-migration
-
+    
     pop$ID<-c(1:nrow(pop))#new ID for the population
     rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
     loci[,21]<-c(1:nrow(pop))#new ID for the loci
     chaos<-order(pop$patch) #vector of indices to orderd after patches
     pop<-pop[chaos,] #order the pop matrix
-   
+    
     
     sorting <- c() #
     for(h in 1:nrow(pop)){
@@ -241,4 +244,3 @@ for(r in 1:replic){
 #plot(trait.N1.vector,main="average trait-value over the generations", xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
 #lines(trait.N2.vector,type="l",col="blue") #includes the average trait-value of patch 2
 #legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
-
