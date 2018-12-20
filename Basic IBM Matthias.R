@@ -110,8 +110,8 @@ for(r in 1:replic){
     
     ##### OFFSPRING #####
     chance<-c()
-    for(ß in 1:patches){###IS OFFSPRING POSSIBLE START
-      chance<-c(chance,nlevels(subset(pop,pop$patch==ß)$gender))#
+    for(pls in 1:patches){###IS OFFSPRING POSSIBLE START
+      chance<-c(chance,nlevels(subset(pop,pop$patch==pls)$gender))#
     }#create a Vector which shows how many different arguments(levels) are in a vector 
     if(max(chance)==2){#if one patch contains both genders then it has a level of 2
     
@@ -122,7 +122,7 @@ for(r in 1:replic){
     # vector of local population sizes
     
     if(nrow(N.w)>0){ #number of offspring per female
-      Nchild <- rpois(nrow(N.w),w(a,b,N.w$trait,N.0,N.x[N.w$patch])) #each female gets a random number of offspring
+      Nchild <- 2*rpois(nrow(N.w),w(a,b,N.w$trait,N.0,N.x[N.w$patch])) #each female gets a random number of offspring
     }
     
     ID.children <- c() #empty vector for the ID
