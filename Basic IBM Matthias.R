@@ -1,6 +1,10 @@
 #Basic IBM
 rm(list=ls())
-source('C:/Users/Leron/Desktop/IBM_code/Gene_generator.R')
+switch(Sys.info()['user'],
+       bio23user = {setwd("/home/bio23user/Documents/Projects/Hiwi-ibm/Hiwi-ibm/")},
+       leron = {setwd("C:/Users/Leron/Desktop/IBM_code/")})
+
+source('Gene_generator.R')
 #USED INDIC######
 #   replication -r
 #   loci/traitv.-x,y,z    
