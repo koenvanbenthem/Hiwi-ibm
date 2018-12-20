@@ -127,12 +127,13 @@ for(r in 1:replic){
     #### START LOOP PARTNERFINDING #####
     patchbook <- c()
     gendergram <- c()
-    
+    if(nrow(N.w)>0){#ANY FEMALES START#####
     for(u in 1:nrow(N.w)){ #loop mother 
-      if(Nchild[u]>0){ #just if the mother becomes offspring
+      if(Nchild[u]>0){ #just if the mother gets offspring
         mother<-N.w$ID[u] #gives the ID of the mother
         
         ###FATHER####
+        if(nrow(subset(N.m,N.m$patch==N.w$patch[u]))>0){#ANY MALES IN THE PATCH OF THE MOTHER? START
         # sample the ID of one male which patchnr. is the same as the patchnr. of the mother
         father<-sample(subset(N.m$ID,N.m$patch==subset(N.w$patch,N.w$ID==mother)),1)
         #GENETICS:
@@ -162,8 +163,10 @@ for(r in 1:replic){
           }
         } #END LOOP NUMBER CHILDREN
         patchbook <- c(patchbook, rep(subset(pop,pop$ID==mother)[2],Nchild[u])) #each kid gets the patch of the mother
-      }
+        }#END ANY MALES?
+        }#does the mother get offspring
     } #END LOOP PARTNERFINDING/mother
+    
     
     pop.new$gender.children <- gendergram #gender of the children are written into the matrix
     pop.new$patch.children <- patchbook #patches of children are written into the matrix
@@ -172,15 +175,17 @@ for(r in 1:replic){
     values.new <- matrix(NA,nrow=sum(Nchild),ncol=10) #empty matrix for the trait values for each loci
     for(d in 1:sum(Nchild)){ #for each individual offspring
       for(f in 1:10){ 
-        values.new[d,f] <- gen_phen_map[f,loci[d,f],loci[d,10+f]]
+        values.new[d,f] <- gen_phen_map[f,loci.new[d,f],loci.new[d,10+f]]
       }
       pop.new[d,4] <- abs(sum(values.new[d,])) ##### USE OF COLUMN.NR
     }
     
+
     
     pop<-rbind(pop,pop.new)
     rownames(pop) <- 1:nrow(pop)
     loci<-rbind(loci,loci.new)
+    }#END ANY FEMALES?
     
     ##### DEATH START #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #every adult loses one survival counter
