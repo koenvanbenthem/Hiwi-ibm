@@ -15,14 +15,14 @@ source('Gene_generator.R')
 #   gender loop -g
 #   patches     -k
 #   values      -d,f
-#   offspring   -j
+#   offspring   -ß,j
 #   migration   -g
 ##### PARAMETERS #####
 replic<-1 #replicates
 Nt<-100 #generations
 mig <- 0.05 #migrationfactor
-max.Age<-1 # age limit
-patches<-2 # Number of Patches
+max.Age<-2 # age limit
+patches<-3 # Number of Patches
 #fecundity
 a <-  0.49649467
 b  <-  1.47718931
@@ -65,12 +65,12 @@ pop<-rbind(pop,patchx)  #data frame including all individuals of all patches
 pop$ID<-c(1:nrow(pop))#new ID for the population
 home<-c(1:patches)#vector of patchnr.
 ##### VECTORS #####
-#pop.N1.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
+Npop <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
 #pop.N2.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 2
 #trait.N1.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 1
 #trait.N2.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 2
 
-#pop.N1.vector[1] <- N1 #populationsize for the first generation of patch 1
+Npop[1] <- nrow(pop) #populationsize for the first generation of patch 1
 #pop.N2.vector[1] <- N2 #populationsize for the first generation of patch 2
 #trait.N1.vector <- mean(pop$trait[pop$patch==1]) #average trait-value for the first generation of patch 1
 #trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the first generation of patch 2
@@ -110,6 +110,12 @@ for(r in 1:replic){
     N.m<- subset(pop,pop$gender=="male") #male individuals in total
     
     ##### OFFSPRING #####
+    chance<-c()
+    for(pls in 1:patches){###IS OFFSPRING POSSIBLE START
+      chance<-c(chance,nlevels(subset(pop,pop$patch==pls)$gender))#
+    }#create a Vector which shows how many different arguments(levels) are in a vector 
+    if(max(chance)==2){#if one patch contains both genders then it has a level of 2
+    
     N.0<-N/500
     for(j in 1:patches){
       N.x<-c(N.x,nrow(subset(pop,pop$patch==j))/500)
@@ -117,15 +123,15 @@ for(r in 1:replic){
     # vector of local population sizes
     
     if(nrow(N.w)>0){ #number of offspring per female
-      Nchild <- rpois(nrow(N.w),w(a,b,N.w$trait,N.0,N.x[N.w$patch])) #each female gets a random number of offspring
+      Nchild <- 2*rpois(nrow(N.w),w(a,b,N.w$trait,N.0,N.x[N.w$patch])) #each female gets a random number of offspring
     }
     
-    ID.children <- c(rep(0,sum(Nchild))) #empty vector for the ID
-    patch.children <- c(rep(0,sum(Nchild))) #empty vector for the patch
-    gender.children <- c(rep(0,sum(Nchild))) #empty vector for the gender
-    trait.children <- c(rep(0,sum(Nchild))) #empty vector for the trait
-    survival.children <- c(rep(max.Age,sum(Nchild))) #each child gets the survival of the maximum age
-    pop.new <- data.frame(ID.children,patch.children,gender.children,trait.children,survival.children)
+    ID.children <- c() #empty vector for the ID
+    patch.children <- c() #empty vector for the patch
+    gender.children <- c() #empty vector for the gender
+    trait.children <- c() #empty vector for the trait
+    survival.children <- c() #each child gets the survival of the maximum age
+    
     
     loci.new <- c() #empty vector: children locis
     
@@ -146,6 +152,7 @@ for(r in 1:replic){
         loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
         loci.child <- rep(0,ncol(loci)) #empty vector with fixed length
         
+        if(Nchild[u]>0){ #just if the mother gets offspring
         for(o in 1:Nchild[u]){ #for loop for the number of children per female
           for(p in 1:(10)){ #loop over the 10 locis
             if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
@@ -166,15 +173,19 @@ for(r in 1:replic){
           } else{ #it is male
             gendergram <- c(gendergram,"male")     
           }
-        } #END LOOP NUMBER CHILDREN
-        patchbook <- c(patchbook, rep(subset(pop,pop$ID==mother)[2],Nchild[u])) #each kid gets the patch of the mother
+        }#END LOOP NUMBER CHILDREN
+        } 
+        patchbook <- c(patchbook, rep(subset(pop,pop$ID==mother)[2],Nchild[u]),recursive=TRUE) #each kid gets the patch of the mother
         }#END ANY MALES?
         }#does the mother get offspring
     } #END LOOP PARTNERFINDING/mother
     
-    
-    pop.new$gender.children <- gendergram #gender of the children are written into the matrix
-    pop.new$patch.children <- patchbook #patches of children are written into the matrix
+    ID.children <- c(rep(0,length(patchbook)))
+    trait.children <- c(rep(0,length(patchbook))) 
+    survival.children <- c(rep(max.Age,length(patchbook))) #each child gets the survival of the maximum age
+    gender.children <- gendergram #gender of the children are written into the matrix
+    patch.children <- patchbook #patches of children are written into the matrix
+    pop.new <- data.frame(ID.children,patch.children,gender.children,trait.children,survival.children)
     colnames(pop.new)<-c("ID","patch","gender","trait","survival") #colum names
     
     values.new <- matrix(NA,nrow=sum(Nchild),ncol=10) #empty matrix for the trait values for each loci
@@ -191,7 +202,7 @@ for(r in 1:replic){
     rownames(pop) <- 1:nrow(pop)
     loci<-rbind(loci,loci.new)
     }#END ANY FEMALES?
-    
+    }#END IS OFFSPRING POSSIBLE
     ##### DEATH START #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #every adult loses one survival counter
     for(v in 1:nrow(pop)){ #for each individual
@@ -206,6 +217,7 @@ for(r in 1:replic){
     
     
     ##### MIGRATION START #####
+    if(nrow(pop)>0){
     wanderlust<-runif(nrow(pop),0,1)# draws one uniformmly distribued number for every individual
     new.patch<-c()
     for(g in 1:length(wanderlust)){#for every individual
@@ -220,10 +232,11 @@ for(r in 1:replic){
     rownames(pop) <- 1:nrow(pop) #re-indexing the population
     pop$ID<-c(1:nrow(pop))#new ID for the population
     loci[,21]<-c(1:nrow(pop))#new ID for the loci
+    }
     ##### MIGRATION END #####
     
     
-    #pop.N1.vector[t] <-sum(pop$patch==1) #overwrites the populationsizes for each generation in the empty vector (patch 1)
+    Npop[t] <-nrow(pop) #overwrites the populationsizes for each generation in the empty vector (patch 1)
     #pop.N2.vector[t] <-sum(pop$patch==2) #overwrites the average trait-value for each generation in the empty vector (patch 2)
     #trait.N1.vector[t] <- mean(pop$trait[pop$patch==1]) #overwrites the average trait-value for each generation in the empty vector (patch 1)
     #trait.N2.vector[t] <- mean(pop$trait[pop$patch==2]) #overwrites the average trait-value for each generation in the empty vector (patch 2)
@@ -242,7 +255,7 @@ for(r in 1:replic){
 
 ##### PLOTS #####
 
-#plot(trait.N1.vector,main="average trait-value over the generations", xlab="generations",ylab="average trait-value",type="l",col="red") #plot traitvalue
+plot(Npop,main="Population over time", xlab="generations",ylab="population",type="l",col="red") #plot traitvalue
 #lines(trait.N2.vector,type="l",col="blue") #includes the average trait-value of patch 2
 #legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
 
