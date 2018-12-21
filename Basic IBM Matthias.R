@@ -6,8 +6,8 @@ switch(Sys.info()['user'],
 
 source('Gene_generator.R')
 
-library(profvis)
-profvis({
+# library(profvis)
+# profvis({
 #USED INDIC######
 #   replication -r
 #   loci/traitv.-x,y,z    
@@ -139,7 +139,7 @@ for(r in 1:replic){
     survival.children <- c() #each child gets the survival of the maximum age
     
     
-    loci.new <- c() #empty vector: children locis
+    loci.new <- matrix(NA,nrow=sum(Nchild),ncol=21) #empty vector: children locis
     
     #### START LOOP PARTNERFINDING #####
     patchbook <- c()
@@ -147,7 +147,9 @@ for(r in 1:replic){
     
     N.w.patch <- table(factor(N.w$patch,levels = 1:patches))# number of females in each patch (as a vector) (N.w.patch[k], number of females in patch k)
     N.m.patch <- table(factor(N.m$patch,levels = 1:patches))
+    curr_child <- 1 # counter that keeps track of how many kids have emerged so far during the loop below
     if(nrow(N.w)>0){#ANY FEMALES START#####
+      
     for(u in 1:nrow(N.w)){ #loop mother 
       if(Nchild[u]>0){ #just if the mother gets offspring
         mother<-N.w$ID[u] #gives the ID of the mother
@@ -155,28 +157,18 @@ for(r in 1:replic){
         ###FATHER####
         if(N.m.patch[N.w$patch[u]]>0){#ANY MALES IN THE PATCH OF THE MOTHER? START
         # sample the ID of one male which patchnr. is the same as the patchnr. of the mother
-        father<-sample(subset(N.m$ID,N.m$patch==subset(N.w$patch,N.w$ID==mother)),1)
+        father<-sample(N.m$ID[N.m$patch==N.w$patch[u]],1)
         #GENETICS:
-        loci.mother <- subset(loci,loci[,21]==mother) #vector of locis of the mother
-        loci.father <- subset(loci,loci[,21]==father) #vector of locis of the father
+        loci.mother <- loci[loci[,21]==mother,] #vector of locis of the mother
+        loci.father <- loci[loci[,21]==father,] #vector of locis of the father
         loci.child <- rep(0,ncol(loci)) #empty vector with fixed length
         
         if(Nchild[u]>0){ #just if the mother gets offspring
         for(o in 1:Nchild[u]){ #for loop for the number of children per female
-          for(p in 1:(10)){ #loop over the 10 locis
-            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-              loci.child[p] <- loci.mother[p] #child gets the top allel (spot p) from mother
-            } else{
-              loci.child[p] <- loci.mother[10+p] #child gets the bottom allel (spot 10+p) from mother
-            }
-            if(runif(1,0,1)>0.5){ #if the random number is higher then 0.5:
-              loci.child[10+p] <- loci.father[p] #child gets the top allel (spot p) from father
-            } else{
-              loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
-            }
-          } #end loop 10 locis
-          loci.new <-  rbind(loci.new,loci.child) #connects loci of the child to the matrix of the other children
-          
+          loci.child[1:10] <- loci.mother[(1:10) +sample(c(0,10),10,replace=TRUE)]
+          loci.child[11:20] <- loci.father[(1:10) +sample(c(0,10),10,replace=TRUE)]
+          loci.new[curr_child,] <-  loci.child #connects loci of the child to the matrix of the other children
+          curr_child <- curr_child + 1
           if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
             gendergram <- c(gendergram,"female")  
           } else{ #it is male
@@ -184,11 +176,12 @@ for(r in 1:replic){
           }
         }#END LOOP NUMBER CHILDREN
         } 
-        patchbook <- c(patchbook, rep(subset(pop,pop$ID==mother)[2],Nchild[u]),recursive=TRUE) #each kid gets the patch of the mother
+        
         }#END ANY MALES?
         }#does the mother get offspring
     } #END LOOP PARTNERFINDING/mother
     
+    patchbook <- rep(N.w$patch,Nchild) #each kid gets the patch of the mother
     ID.children <- c(rep(0,length(patchbook)))
     trait.children <- c(rep(0,length(patchbook))) 
     survival.children <- c(rep(max.Age,length(patchbook))) #each child gets the survival of the maximum age
@@ -197,15 +190,13 @@ for(r in 1:replic){
     pop.new <- data.frame(ID.children,patch.children,gender.children,trait.children,survival.children)
     colnames(pop.new)<-c("ID","patch","gender","trait","survival") #colum names
     
+    # gen_phen_map[locus,bla,bla](loci.new)
     values.new <- matrix(NA,nrow=sum(Nchild),ncol=10) #empty matrix for the trait values for each loci
-    for(d in 1:sum(Nchild)){ #for each individual offspring
-      for(f in 1:10){ 
-        values.new[d,f] <- gen_phen_map[f,loci.new[d,f],loci.new[d,10+f]]
-      }
-      pop.new[d,4] <- abs(sum(values.new[d,])) ##### USE OF COLUMN.NR
-    }
-    
 
+    for(d in 1:sum(Nchild)){ #for each individual offspring
+        values.new[d,] <- gen_phen_map[cbind(1:10,loci.new[d,1:10],loci.new[d,11:20])]
+    }
+    pop.new$trait <- abs(rowSums(values.new)) ##### USE OF COLUMN.NR
     
     pop<-rbind(pop,pop.new)
     rownames(pop) <- 1:nrow(pop)
@@ -250,7 +241,7 @@ for(r in 1:replic){
   #  print(r)
 }
 ##### REPLICATION LOOP END#####
-})
+# })
 
 ##### PLOTS #####
 
