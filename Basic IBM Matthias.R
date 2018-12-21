@@ -46,20 +46,21 @@ w<-function(a,b,z,N,Np){
 
 ##### PATCHES #####
 pop<-c()
+
 for(k in 1:patches){
 
-N_patchx<-abs(round(rnorm(1, mean=250, sd=10))) #Number of individuals in the patch 
-
-patchx_m<-round(runif(1,N_patchx/4,3*N_patchx/4)) #Number of males in the patch
-
-ID <- c(1:(N_patchx)) #vector ID: gives each individual an ID
-patch<-c(rep(k,N_patchx)) #vector patch: gives each individual their patch Nr.
-gender<-c(rep("male",patchx_m),rep("female",N_patchx-patchx_m)) #vector gender: is filled with males and females
-trait<-c(rep(0.5,N_patchx)) #vector trait: is for all individuals from both patches set as 5
-survival<-c(rep(max.Age,N_patchx)) #vector survival: is for all new individuals of both patches 1
-
-patchx<-data.frame(ID,patch,gender,trait,survival)
-pop<-rbind(pop,patchx)  #data frame including all individuals of all patches
+  N_patchx<-abs(round(rnorm(1, mean=250, sd=10))) #Number of individuals in the patch 
+  
+  patchx_m<-round(runif(1,N_patchx/4,3*N_patchx/4)) #Number of males in the patch
+  
+  ID <- c(1:(N_patchx)) #vector ID: gives each individual an ID
+  patch<-c(rep(k,N_patchx)) #vector patch: gives each individual their patch Nr.
+  gender<-c(rep("male",patchx_m),rep("female",N_patchx-patchx_m)) #vector gender: is filled with males and females
+  trait<-c(rep(0.5,N_patchx)) #vector trait: is for all individuals from both patches set as 5
+  survival<-c(rep(max.Age,N_patchx)) #vector survival: is for all new individuals of both patches 1
+  
+  patchx<-data.frame(ID,patch,gender,trait,survival)
+  pop<-rbind(pop,patchx)  #data frame including all individuals of all patches
 }
 
 pop$ID<-c(1:nrow(pop))#new ID for the population
@@ -82,12 +83,14 @@ for(r in 1:replic){
 
   population <- nrow(pop) #number of individuals
   loci <- matrix(NA,nrow=population,ncol=20+1) #empty matrix for the locis
+  
   for(x in 1:population){ #for each individual
     loci[x,] <- round(runif(21,1,10)) #each individual has 20 random numbers (first 10:row //last 10:column)
     loci[x,21] <- x
   }
   
   values <- matrix(NA,nrow=population,ncol=10) #empty matrix for the trait values for each loci
+  
   for(y in 1:population){ #for each individual
     for(z in 1:10){ 
       values[y,z] <- gen_phen_map[z,loci[y,z],loci[y,10+z]]
