@@ -98,11 +98,12 @@ for(r in 1:replic){
   
   ##### GENERATION LOOP START #####  
   for(t in 1:Nt){
+    
+    N<- nrow(pop) #how many individuals there are in both patches
+    
     ######IS ANYBODY THERE? START##############
-    if(nrow(pop)>0){
-      
-      
-    N<-c(nrow(pop)) #how many individuals there are in both patches
+    if(N>0){
+
     N.x<-c()
     ##### MATRICES #####
     N.w <- subset(pop,pop$gender=="female") #female individuals in total
