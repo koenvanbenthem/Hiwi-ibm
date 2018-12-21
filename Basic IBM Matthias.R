@@ -144,13 +144,16 @@ for(r in 1:replic){
     #### START LOOP PARTNERFINDING #####
     patchbook <- c()
     gendergram <- c()
+    
+    N.w.patch <- table(factor(N.w$patch,levels = 1:patches))# number of females in each patch (as a vector) (N.w.patch[k], number of females in patch k)
+    N.m.patch <- table(factor(N.m$patch,levels = 1:patches))
     if(nrow(N.w)>0){#ANY FEMALES START#####
     for(u in 1:nrow(N.w)){ #loop mother 
       if(Nchild[u]>0){ #just if the mother gets offspring
         mother<-N.w$ID[u] #gives the ID of the mother
         
         ###FATHER####
-        if(nrow(subset(N.m,N.m$patch==N.w$patch[u]))>0){#ANY MALES IN THE PATCH OF THE MOTHER? START
+        if(N.m.patch[N.w$patch[u]]>0){#ANY MALES IN THE PATCH OF THE MOTHER? START
         # sample the ID of one male which patchnr. is the same as the patchnr. of the mother
         father<-sample(subset(N.m$ID,N.m$patch==subset(N.w$patch,N.w$ID==mother)),1)
         #GENETICS:
