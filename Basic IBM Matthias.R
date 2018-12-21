@@ -15,7 +15,7 @@ source('Gene_generator.R')
 #   gender loop -g
 #   patches     -k
 #   values      -d,f
-#   offspring   -ß,j
+#   offspring   -?,j
 #   migration   -g
 ##### PARAMETERS #####
 replic<-1 #replicates
@@ -23,6 +23,7 @@ Nt<-100 #generations
 mig <- 0.05 #migrationfactor
 max.Age<-2 # age limit
 patches<-3 # Number of Patches
+
 #fecundity
 a <-  0.49649467
 b  <-  1.47718931
@@ -44,60 +45,59 @@ w<-function(a,b,z,N,Np){
 }
 
 
-##### PATCHES #####
-pop<-c()
-
-for(k in 1:patches){
-
-  N_patchx<-abs(round(rnorm(1, mean=250, sd=10))) #Number of individuals in the patch 
-  
-  patchx_m<-round(runif(1,N_patchx/4,3*N_patchx/4)) #Number of males in the patch
-  
-  ID <- c(1:(N_patchx)) #vector ID: gives each individual an ID
-  patch<-c(rep(k,N_patchx)) #vector patch: gives each individual their patch Nr.
-  gender<-c(rep("male",patchx_m),rep("female",N_patchx-patchx_m)) #vector gender: is filled with males and females
-  trait<-c(rep(0.5,N_patchx)) #vector trait: is for all individuals from both patches set as 5
-  survival<-c(rep(max.Age,N_patchx)) #vector survival: is for all new individuals of both patches 1
-  
-  patchx<-data.frame(ID,patch,gender,trait,survival)
-  pop<-rbind(pop,patchx)  #data frame including all individuals of all patches
-}
-
-pop$ID<-c(1:nrow(pop))#new ID for the population
-home<-c(1:patches)#vector of patchnr.
-##### VECTORS #####
-Npop <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
-#pop.N2.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 2
-#trait.N1.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 1
-#trait.N2.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 2
-
-Npop[1] <- nrow(pop) #populationsize for the first generation of patch 1
-#pop.N2.vector[1] <- N2 #populationsize for the first generation of patch 2
-#trait.N1.vector <- mean(pop$trait[pop$patch==1]) #average trait-value for the first generation of patch 1
-#trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the first generation of patch 2
-
-
 ##### REPLICATION LOOP START#####
-
 for(r in 1:replic){
-
-  population <- nrow(pop) #number of individuals
-  loci <- matrix(NA,nrow=population,ncol=20+1) #empty matrix for the locis
+  ##### INITIALISATION PATCHES #####
+  pop<-c()
   
-  for(x in 1:population){ #for each individual
-    loci[x,] <- round(runif(21,1,10)) #each individual has 20 random numbers (first 10:row //last 10:column)
-    loci[x,21] <- x
+  
+  for(k in 1:patches){
+  
+    N_patchx<-abs(round(rnorm(1, mean=250, sd=10))) #Number of individuals in the patch 
+    
+    patchx_m<-round(runif(1,N_patchx/4,3*N_patchx/4)) #Number of males in the patch
+    
+    ID <- c(1:(N_patchx)) #vector ID: gives each individual an ID
+    patch<-c(rep(k,N_patchx)) #vector patch: gives each individual their patch Nr.
+    gender<-c(rep("male",patchx_m),rep("female",N_patchx-patchx_m)) #vector gender: is filled with males and females
+    trait<-c(rep(0.5,N_patchx)) #vector trait: is for all individuals from both patches set as 5
+    survival<-c(rep(max.Age,N_patchx)) #vector survival: is for all new individuals of both patches 1
+    
+    patchx<-data.frame(ID,patch,gender,trait,survival)
+    pop<-rbind(pop,patchx)  #data frame including all individuals of all patches
   }
   
-  values <- matrix(NA,nrow=population,ncol=10) #empty matrix for the trait values for each loci
+  pop$ID<-c(1:nrow(pop))#new ID for the population
+  home<-c(1:patches)#vector of patchnr.
+  ##### VECTORS #####
+  Npop <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
+  #pop.N2.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 2
+  #trait.N1.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 1
+  #trait.N2.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 2
   
-  for(y in 1:population){ #for each individual
-    for(z in 1:10){ 
-      values[y,z] <- gen_phen_map[z,loci[y,z],loci[y,10+z]]
+  Npop[1] <- nrow(pop) #populationsize for the first generation of patch 1
+  #pop.N2.vector[1] <- N2 #populationsize for the first generation of patch 2
+  #trait.N1.vector <- mean(pop$trait[pop$patch==1]) #average trait-value for the first generation of patch 1
+  #trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the first generation of patch 2
+  
+  
+    population <- nrow(pop) #number of individuals
+    loci <- matrix(NA,nrow=population,ncol=20+1) #empty matrix for the locis
+    
+    for(x in 1:population){ #for each individual
+      loci[x,] <- round(runif(21,1,10)) #each individual has 20 random numbers (first 10:row //last 10:column)
+      loci[x,21] <- x
     }
-    pop[y,4] <- abs(sum(values[y,])) ##### USE OF COLUMN.NR
-  }
-  
+    
+    values <- matrix(NA,nrow=population,ncol=10) #empty matrix for the trait values for each loci
+    
+    for(y in 1:population){ #for each individual
+      for(z in 1:10){ 
+        values[y,z] <- gen_phen_map[z,loci[y,z],loci[y,10+z]]
+      }
+      pop$trait[y] <- abs(sum(values[y,])) ##### USE OF COLUMN.NR
+    }
+    
   
   ##### GENERATION LOOP START #####  
   for(t in 1:Nt){
