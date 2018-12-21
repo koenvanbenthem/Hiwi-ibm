@@ -221,16 +221,8 @@ for(r in 1:replic){
     
     ##### MIGRATION START #####
     if(nrow(pop)>0){
-    wanderlust<-runif(nrow(pop),0,1)# draws one uniformmly distribued number for every individual
-    new.patch<-c()
-    for(g in 1:length(wanderlust)){#for every individual
-      if(wanderlust[g]<mig){#if wanderlust is lower than mig sample one patchnumber out of a vector of patchnr. other than your own
-        new.patch<-c(new.patch,sample(subset(home,home!=(pop$patch[g])),1),recursive=TRUE)#samples one patchnr. out of a vector of patchnr. with the exception of the individuals own patch
-      }else{# if mig is higher than wanderlust just put in your own patchnr.
-        new.patch<-c(new.patch,pop$patch[g],recursive=TRUE)
-      }
-          }
-    pop$patch<-new.patch#override the vector in the population
+    wanderers<-runif(nrow(pop),0,1) < mig# draws one uniformmly distribued number for every individual
+    pop$patch[wanderers] <- (pop$patch[wanderers] - 1 + floor(runif(sum(wanderers),1,patches)))%%patches + 1
     
     rownames(pop) <- 1:nrow(pop) #re-indexing the population
     pop$ID<-c(1:nrow(pop))#new ID for the population
