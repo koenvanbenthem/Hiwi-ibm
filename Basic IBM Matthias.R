@@ -5,6 +5,9 @@ switch(Sys.info()['user'],
        Leron = {setwd("C:/Users/Leron/Desktop/IBM_code/")})
 
 source('Gene_generator.R')
+
+library(profvis)
+profvis({
 #USED INDIC######
 #   replication -r
 #   loci/traitv.-x,y,z    
@@ -208,11 +211,9 @@ for(r in 1:replic){
     }#END IS OFFSPRING POSSIBLE
     ##### DEATH START #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #every adult loses one survival counter
-    for(v in 1:nrow(pop)){ #for each individual
-      if(pop[v,5]==0){ #if the survival is 0, it replaces the first loci with -2
-        loci[v,1] <- -2
-      }
-    }
+    
+    loci[pop$survival==0,1] <- -2  #if the survival is 0, it replaces the first loci with -2
+
     
     loci <- subset(loci,loci[,1]>(-2 )) #all rows with a -2 in the beginning are deleted
     pop <-subset(pop,pop$survival>0) #Individuals which have a survival higher then 0 stay alive in the dataframe
@@ -221,12 +222,12 @@ for(r in 1:replic){
     
     ##### MIGRATION START #####
     if(nrow(pop)>0){
-    wanderers<-runif(nrow(pop),0,1) < mig# draws one uniformmly distribued number for every individual
-    pop$patch[wanderers] <- (pop$patch[wanderers] - 1 + floor(runif(sum(wanderers),1,patches)))%%patches + 1
-    
-    rownames(pop) <- 1:nrow(pop) #re-indexing the population
-    pop$ID<-c(1:nrow(pop))#new ID for the population
-    loci[,21]<-c(1:nrow(pop))#new ID for the loci
+      wanderers<-runif(nrow(pop),0,1) < mig# draws one uniformmly distribued number for every individual
+      pop$patch[wanderers] <- (pop$patch[wanderers] - 1 + floor(runif(sum(wanderers),1,patches)))%%patches + 1
+      
+      rownames(pop) <- 1:nrow(pop) #re-indexing the population
+      pop$ID<-c(1:nrow(pop))#new ID for the population
+      loci[,21]<-c(1:nrow(pop))#new ID for the loci
     }
     ##### MIGRATION END #####
     
@@ -246,7 +247,7 @@ for(r in 1:replic){
   #  print(r)
 }
 ##### REPLICATION LOOP END#####
-
+})
 
 ##### PLOTS #####
 
