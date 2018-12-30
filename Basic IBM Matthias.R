@@ -18,7 +18,7 @@ source('Gene_generator.R')
 #   gender loop -g
 #   patches     -k
 #   values      -d,f
-#   offspring   -?,j
+#   offspring   -pls,j
 #   migration   -g
 ##### PARAMETERS #####
 replic<-1 #replicates
@@ -26,7 +26,8 @@ Nt<-100 #generations
 mig <- 0.05 #migrationfactor
 max.Age<-2 # age limit
 patches<-3 # Number of Patches
-
+mutate<-0.05 #mutationfactor
+DIE<-0.05 #Chance to die
 
 #fecundity
 a <-  0.49649467
@@ -73,17 +74,49 @@ for(r in 1:replic){
   
   pop$ID<-c(1:nrow(pop))#new ID for the population
   home<-c(1:patches)#vector of patchnr.
-  ##### VECTORS #####
+  ##### Statistic #####
+  #population
   Npop <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
-  #pop.N2.vector <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 2
-  #trait.N1.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 1
-  #trait.N2.vector <- rep(0,Nt) #empty vector for the average trait-value of each generation in patch 2
+  Trait.pop <- rep(0,Nt) #empty vector for the mean traitvalue of each generation
   
   Npop[1] <- nrow(pop) #populationsize for the first generation of patch 1
-  #pop.N2.vector[1] <- N2 #populationsize for the first generation of patch 2
-  #trait.N1.vector <- mean(pop$trait[pop$patch==1]) #average trait-value for the first generation of patch 1
-  #trait.N2.vector <- mean(pop$trait[pop$patch==2]) #average trait-value for the first generation of patch 2
+  Trait.pop[1] <- mean(pop$trait) #populationsize for the first generation of patch 2
   
+  #patches
+  #population,average traitvalue and genderdistribution per patch
+  Npatch.1 <- rep(0,Nt) 
+  Trait.patch.1 <- rep(0,Nt)
+  Females.patch.1<- rep(0,Nt)
+  Males.patch.1<- rep(0,Nt)
+  
+  Npatch.1[1] <-  nrow(subset(pop,pop$patch==1))
+  Trait.patch.1[1] <- mean(subset(pop,pop$patch==1)$trait)
+  Females.patch.1[1] <-nrow(subset(subset(pop,pop$patch==1),gender=="female"))
+  Males.patch.1[1] <- nrow(subset(subset(pop,pop$patch==1),gender=="male"))
+  
+
+  Npatch.2 <- rep(0,Nt) 
+  Trait.patch.2 <- rep(0,Nt)
+  Females.patch.2<- rep(0,Nt)
+  Males.patch.2<- rep(0,Nt)
+  
+  Npatch.2[1] <-  nrow(subset(pop,pop$patch==2))
+  Trait.patch.2[1] <- mean(subset(pop,pop$patch==2)$trait)
+  Females.patch.2[1] <-nrow(subset(subset(pop,pop$patch==2),gender=="female"))
+  Males.patch.2[1] <- nrow(subset(subset(pop,pop$patch==2),gender=="male"))
+  
+  
+  Npatch.3 <- rep(0,Nt) 
+  Trait.patch.3 <- rep(0,Nt)
+  Females.patch.3<- rep(0,Nt)
+  Males.patch.3<- rep(0,Nt)
+  
+  Npatch.3[1] <-  nrow(subset(pop,pop$patch==3))
+  Trait.patch.3[1] <- mean(subset(pop,pop$patch==3)$trait)
+  Females.patch.3[1] <-nrow(subset(subset(pop,pop$patch==3),gender=="female"))
+  Males.patch.3[1] <- nrow(subset(subset(pop,pop$patch==3),gender=="male"))
+  
+  ########Statistic End#####
   
     population <- nrow(pop) #number of individuals
     loci <- matrix(NA,nrow=population,ncol=20+1) #empty matrix for the locis
@@ -170,6 +203,12 @@ for(r in 1:replic){
 
           loci.child[1:10] <- loci.mother[(1:10) +sample(c(0,10),10,replace=TRUE)]
           loci.child[11:20] <- loci.father[(1:10) +sample(c(0,10),10,replace=TRUE)]
+          #MUTATION
+          #if(runif(1,0,1)<mutate){
+          #loci.child[round(runif(1,1,20))]<-round(runif(1,1,10))
+          #}
+          
+          
           loci.new[curr_child,] <-  loci.child #connects loci of the child to the matrix of the other children
           curr_child <- curr_child + 1
 
@@ -210,7 +249,14 @@ for(r in 1:replic){
     ##### DEATH START #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #every adult loses one survival counter
     loci[pop$survival==0,1] <- -2  #if the survival is 0, it replaces the first loci with -2
-    
+   
+    #random Death
+    # if(runif(1,0,1<DIE)){
+    #for(v in nrow(pop)){
+    #  pop$survival[v]<-0
+    #  loci[v,1] <- -2
+    #}
+    #}
     
     loci <- subset(loci,loci[,1]>(-2 )) #all rows with a -2 in the beginning are deleted
     pop <-subset(pop,pop$survival>0) #Individuals which have a survival higher then 0 stay alive in the dataframe
@@ -228,11 +274,26 @@ for(r in 1:replic){
     }
     ##### MIGRATION END #####
     
-    
+    ###Statistic 2##
     Npop[t] <-nrow(pop) #overwrites the populationsizes for each generation in the empty vector (patch 1)
-    #pop.N2.vector[t] <-sum(pop$patch==2) #overwrites the average trait-value for each generation in the empty vector (patch 2)
-    #trait.N1.vector[t] <- mean(pop$trait[pop$patch==1]) #overwrites the average trait-value for each generation in the empty vector (patch 1)
-    #trait.N2.vector[t] <- mean(pop$trait[pop$patch==2]) #overwrites the average trait-value for each generation in the empty vector (patch 2)
+    Trait.pop[t] <- mean(pop$trait)#trait.N1.vector[t] <- mean(pop$trait[pop$patch==1]) #overwrites the average trait-value for each generation in the empty vector (patch 1)
+    
+    Npatch.1[t] <-  nrow(subset(pop,pop$patch==1))
+    Trait.patch.1[t] <- mean(subset(pop,pop$patch==1)$trait)
+    Females.patch.1[t] <-nrow(subset(subset(pop,pop$patch==1),gender=="female"))
+    Males.patch.1[t] <- nrow(subset(subset(pop,pop$patch==1),gender=="male"))
+    
+    Npatch.2[t] <-  nrow(subset(pop,pop$patch==2))
+    Trait.patch.2[t] <- mean(subset(pop,pop$patch==2)$trait)
+    Females.patch.2[t] <-nrow(subset(subset(pop,pop$patch==2),gender=="female"))
+    Males.patch.2[t] <- nrow(subset(subset(pop,pop$patch==2),gender=="male"))
+    
+    Npatch.3[t] <-  nrow(subset(pop,pop$patch==3))
+    Trait.patch.3[t] <- mean(subset(pop,pop$patch==3)$trait)
+    Females.patch.3[t] <-nrow(subset(subset(pop,pop$patch==3),gender=="female"))
+    Males.patch.3[t] <- nrow(subset(subset(pop,pop$patch==3),gender=="male"))
+    
+    ##### End Statistic 2#############
     }### IS ANYBODY THERE? END ######
     } ##### GENERATION LOOP END #####
   
@@ -248,9 +309,29 @@ for(r in 1:replic){
 
 ##### PLOTS #####
 
-plot(Npop,main="Population over time", xlab="generations",ylab="population",type="l",col="red") #plot traitvalue
-#lines(trait.N2.vector,type="l",col="blue") #includes the average trait-value of patch 2
-#legend("topright",legend=c("patch 1","patch 2"),lty=1,col=c("red","blue"))
+plot(Npop,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(0,max(Npop))) #plot traitvalue
+lines(Npatch.1,type="l",col="turquoise")
+lines(Npatch.2,type="l",col="violet")
+lines(Npatch.3,type="l",col="orange")
+
+
+
+plot(Trait.pop,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim = c(0.001,0.002))
+lines(Trait.patch.1,type="l",col="turquoise")
+lines(Trait.patch.2,type="l",col="violet")
+lines(Trait.patch.3,type="l",col="orange")
+
+
+
+plot(Females.patch.1,main="Population over time", xlab="generations",ylab="population",type="l",col="red")
+lines(Males.patch.1,type="l",col="green")
+
+
+plot(Females.patch.2,main="Population over time", xlab="generations",ylab="population",type="l",col="red")
+lines(Males.patch.2,type="l",col="green")
+
+plot(Females.patch.3,main="Population over time", xlab="generations",ylab="population",type="l",col="red")
+lines(Males.patch.3,type="l",col="green")
 
 
 
