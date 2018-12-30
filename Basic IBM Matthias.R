@@ -22,7 +22,9 @@ replic<-1 #replicates
 Nt<-100 #generations
 mig <- 0.05 #migrationfactor
 max.Age<-2 # age limit
-patches<-3 # Number of Patches
+patches<-2 # Number of Patches
+mutation<-0.05 #mutationfactor
+DIE<-0.05 #Chance to die
 #fecundity
 a <-  0.49649467
 b  <-  1.47718931
@@ -165,6 +167,12 @@ for(r in 1:replic){
               loci.child[10+p] <- loci.father[10+p] #child gets the bottom allel (spot 10+p) from mother
             }
           } #end loop 10 locis
+          
+          ##Mutation###
+          if(runif(1,0,1)<mutation){
+          loci.child[round(runif(1,1,20))]<-round(runif(1,1,10))
+          }
+          
           loci.new <-  rbind(loci.new,loci.child) #connects loci of the child to the matrix of the other children
           
           if(runif(1,0,1)>0.5){ #if random number is higher als 0.5, child is female
@@ -205,10 +213,17 @@ for(r in 1:replic){
     ##### DEATH START #####
     pop$survival[1:N]<-pop$survival[1:N]-1 #every adult loses one survival counter
     for(v in 1:nrow(pop)){ #for each individual
+      # Death - AGE
       if(pop[v,5]==0){ #if the survival is 0, it replaces the first loci with -2
         loci[v,1] <- -2
       }
+      #Death - CHANCE
+      if(runif(1,0,1<DIE)){
+        pop$survival[v]<-0
+        loci[v,1] <- -2
+      }
     }
+    
     
     loci <- subset(loci,loci[,1]>(-2 )) #all rows with a -2 in the beginning are deleted
     pop <-subset(pop,pop$survival>0) #Individuals which have a survival higher then 0 stay alive in the dataframe
