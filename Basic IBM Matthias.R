@@ -22,7 +22,7 @@ source('Gene_generator.R')
 #   migration   -g
 ##### PARAMETERS #####
 replic<-1 #replicates
-Nt<-100 #generations
+Nt<-1000 #generations
 mig <- 0.05 #migrationfactor
 max.Age<-2 # age limit
 patches<-3 # Number of Patches
@@ -316,21 +316,21 @@ lines(Npatch.3,type="l",col="orange")
 
 
 
-plot(Trait.pop,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim = c(0.001,0.002))
+plot(Trait.pop,main="mean trait value over time", xlab="generations",ylab="trait value",type="l",col="black",ylim = c(0.001,0.02))
 lines(Trait.patch.1,type="l",col="turquoise")
 lines(Trait.patch.2,type="l",col="violet")
 lines(Trait.patch.3,type="l",col="orange")
 
 
 
-plot(Females.patch.1,main="Population over time", xlab="generations",ylab="population",type="l",col="red")
+plot(Females.patch.1,main="Frequency of the Sexes Patch 1", xlab="generations",ylab="frequency",type="l",col="red")
 lines(Males.patch.1,type="l",col="green")
 
 
-plot(Females.patch.2,main="Population over time", xlab="generations",ylab="population",type="l",col="red")
+plot(Females.patch.2,main="Frequency of the Sexes Patch 2", xlab="generations",ylab="frequency",type="l",col="red")
 lines(Males.patch.2,type="l",col="green")
 
-plot(Females.patch.3,main="Population over time", xlab="generations",ylab="population",type="l",col="red")
+plot(Females.patch.3,main="Frequency of the Sexes Patch 3", xlab="generations",ylab="frequency",type="l",col="red")
 lines(Males.patch.3,type="l",col="green")
 
 
