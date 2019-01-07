@@ -1,5 +1,6 @@
 #Basic IBM
 rm(list=ls())
+
 switch(Sys.info()['user'],
        bio23user = {setwd("/home/bio23user/Documents/Projects/Hiwi-ibm/Hiwi-ibm/")},
        Leron = {setwd("C:/Users/Leron/Desktop/IBM_code/")})
@@ -204,9 +205,9 @@ for(r in 1:replic){
           loci.child[1:10] <- loci.mother[(1:10) +sample(c(0,10),10,replace=TRUE)]
           loci.child[11:20] <- loci.father[(1:10) +sample(c(0,10),10,replace=TRUE)]
           #MUTATION
-          #if(runif(1,0,1)<mutate){
-          #loci.child[round(runif(1,1,20))]<-round(runif(1,1,10))
-          #}
+          if(runif(1,0,1)<mutate){
+          loci.child[round(runif(1,1,20))]<-round(runif(1,1,10))
+          }
           
           
           loci.new[curr_child,] <-  loci.child #connects loci of the child to the matrix of the other children
@@ -251,12 +252,10 @@ for(r in 1:replic){
     loci[pop$survival==0,1] <- -2  #if the survival is 0, it replaces the first loci with -2
    
     #random Death
-    # if(runif(1,0,1<DIE)){
-    #for(v in nrow(pop)){
-    #  pop$survival[v]<-0
-    #  loci[v,1] <- -2
-    #}
-    #}
+    
+    die_ind <- runif(nrow(pop),0,1) < DIE
+    pop$survival[die_ind]<-0
+    loci[die_ind,1] <- -2
     
     loci <- subset(loci,loci[,1]>(-2 )) #all rows with a -2 in the beginning are deleted
     pop <-subset(pop,pop$survival>0) #Individuals which have a survival higher then 0 stay alive in the dataframe
