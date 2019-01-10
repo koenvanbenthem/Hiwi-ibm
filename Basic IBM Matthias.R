@@ -1,6 +1,27 @@
 #Basic IBM
 rm(list=ls())
-
+Morpheus<-function(replic=1,
+                   Nt=1000, #generations
+                   mig=0.05, #migrationfactor
+                   max.Age=2, # age limit
+                   patches=3, # Number of Patches
+                   mutate=0.05, #mutationfactor
+                   DIE=0.05, #Chance to die
+                   
+                   #fecundity
+                   a=0.49649467,
+                   b=1.47718931,
+                   c1=0.72415095,
+                   c2=-0.24464625,
+                   c3=0.99490196,
+                   c4=-1.31337296,
+                   c5=-0.06855583,
+                   c6 = 0.32833236,
+                   c7=-20.88383990,
+                   c8=-0.66263785,
+                   c9=2.39334027,
+                   c10=0.11670283
+){
 switch(Sys.info()['user'],
        bio23user = {setwd("/home/bio23user/Documents/Projects/Hiwi-ibm/Hiwi-ibm/")},
        Leron = {setwd("C:/Users/Leron/Desktop/IBM_code/")},
@@ -22,28 +43,6 @@ source('Gene_generator.R')
 #   values      -d,f
 #   offspring   -pls,j
 #   migration   -g
-##### PARAMETERS #####
-replic<-1 #replicates
-Nt<-1000 #generations
-mig <- 0.05 #migrationfactor
-max.Age<-2 # age limit
-patches<-3 # Number of Patches
-mutate<-0.05 #mutationfactor
-DIE<-0.05 #Chance to die
-
-#fecundity
-a <-  0.49649467
-b  <-  1.47718931
-c1    <-  0.72415095
-c2    <- -0.24464625
-c3    <-  0.99490196
-c4    <- -1.31337296
-c5    <- -0.06855583
-c6    <-  0.32833236
-c7    <--20.88383990
-c8    <- -0.66263785
-c9    <-  2.39334027
-c10   <-  0.11670283
 
 ##### FUNCTIONS #####
 w<-function(a,b,z,N,Np){
@@ -51,7 +50,13 @@ w<-function(a,b,z,N,Np){
   return(y)
 }
 
+Here_is_your_ID<-function(Nchild,ID_scan){
 
+  ID.children <-   ID_scan:(ID_scan+sum(Nchild)-1)
+  ID_scan <<- ID_scan + sum(Nchild)
+  return(ID.children)
+}
+Here_is_your_ID(Nchild,ID_scan)
 ##### REPLICATION LOOP START#####
 for(r in 1:replic){
   ##### INITIALISATION PATCHES #####
@@ -76,6 +81,8 @@ for(r in 1:replic){
   
   pop$ID<-c(1:nrow(pop))#new ID for the population
   home<-c(1:patches)#vector of patchnr.
+ 
+  ID_scan<-nrow(pop)+1
   ##### Statistic #####
   #population
   Npop <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
@@ -227,7 +234,7 @@ for(r in 1:replic){
     } #END LOOP PARTNERFINDING/mother
     
     patchbook <- rep(N.w$patch,Nchild) #each kid gets the patch of the mother
-    ID.children <- c(rep(0,length(patchbook)))
+    ID.children <- Here_is_your_ID(Nchild,ID_scan)
     trait.children <- c(rep(0,length(patchbook))) 
     survival.children <- c(rep(max.Age,length(patchbook))) #each child gets the survival of the maximum age
     gender.children <- gendergram #gender of the children are written into the matrix
@@ -269,8 +276,6 @@ for(r in 1:replic){
       pop$patch[wanderers] <- (pop$patch[wanderers] - 1 + floor(runif(sum(wanderers),1,patches)))%%patches + 1
       
       rownames(pop) <- 1:nrow(pop) #re-indexing the population
-      pop$ID<-c(1:nrow(pop))#new ID for the population
-      loci[,21]<-c(1:nrow(pop))#new ID for the loci
     }
     ##### MIGRATION END #####
     
@@ -307,6 +312,8 @@ for(r in 1:replic){
 ##### REPLICATION LOOP END#####
 # })
 
+}#END MORPHEUS
+
 ##### PLOTS #####
 
 plot(Npop,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(0,max(Npop))) #plot traitvalue
@@ -332,20 +339,3 @@ lines(Males.patch.2,type="l",col="green")
 
 plot(Females.patch.3,main="Frequency of the Sexes Patch 3", xlab="generations",ylab="frequency",type="l",col="red")
 lines(Males.patch.3,type="l",col="green")
-
-
-
-#######Order######
-pop$ID<-c(1:nrow(pop))#new ID for the population
-rownames(pop) <- 1:nrow(pop) #re-indexing the population to prevent 1.1.3.2.4.....
-loci[,21]<-c(1:nrow(pop))#new ID for the loci
-chaos<-order(pop$patch) #vector of indices to orderd after patches
-pop<-pop[chaos,] #order the pop matrix
-
-
-sorting <- c() #
-for(h in 1:nrow(pop)){
-  sorting <- rbind(sorting, subset(loci,loci[21]==pop[h,1]))
-}
-loci <- sorting
-
