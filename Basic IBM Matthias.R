@@ -50,12 +50,12 @@ w<-function(a,b,z,N,Np){
 }
 
 Here_is_your_ID<-function(Nchild,ID_scan){
-  for(hebe in 1:sum(Nchild)){
-  ID.children <- c(ID.children,ID_scan)
-ID_scan<-ID_scan+1
-  }
-}
 
+  ID.children <-   ID_scan:(ID_scan+sum(Nchild)-1)
+  ID_scan <<- ID_scan + sum(Nchild)
+  return(ID.children)
+}
+Here_is_your_ID(Nchild,ID_scan)
 ##### REPLICATION LOOP START#####
 for(r in 1:replic){
   ##### INITIALISATION PATCHES #####
@@ -81,7 +81,7 @@ for(r in 1:replic){
   pop$ID<-c(1:nrow(pop))#new ID for the population
   home<-c(1:patches)#vector of patchnr.
  
-   ID_scan<-nrow(pop)+1
+  ID_scan<-nrow(pop)+1
   ##### Statistic #####
   #population
   Npop <- rep(0,Nt) #empty vector for the populationsize of each generation in patch 1
