@@ -3,7 +3,8 @@ rm(list=ls())
 
 switch(Sys.info()['user'],
        bio23user = {setwd("/home/bio23user/Documents/Projects/Hiwi-ibm/Hiwi-ibm/")},
-       Leron = {setwd("C:/Users/Leron/Desktop/IBM_code/")})
+       Leron = {setwd("C:/Users/Leron/Desktop/IBM_code/")},
+       Anwender = {setwd("C:/Users/Anwender/Desktop/")})
 
 source('Gene_generator.R')
 
