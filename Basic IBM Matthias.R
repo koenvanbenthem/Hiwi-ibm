@@ -233,7 +233,7 @@ for(r in 1:replic){
     } #END LOOP PARTNERFINDING/mother
     
     patchbook <- rep(N.w$patch,Nchild) #each kid gets the patch of the mother
-    ID.children <- Here_is_your_ID(Nchild,ID_scan)??????????????
+    ID.children <- Here_is_your_ID(Nchild,ID_scan)
     trait.children <- c(rep(0,length(patchbook))) 
     survival.children <- c(rep(max.Age,length(patchbook))) #each child gets the survival of the maximum age
     gender.children <- gendergram #gender of the children are written into the matrix
