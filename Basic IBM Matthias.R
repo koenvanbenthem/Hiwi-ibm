@@ -50,13 +50,13 @@ w<-function(a,b,z,N,Np){
   return(y)
 }
 
-Here_is_your_ID<-function(Nchild,ID_scan){
+Here_is_your_ID<-function(Nchild){
 
   ID.children <-   ID_scan:(ID_scan+sum(Nchild)-1)
   ID_scan <<- ID_scan + sum(Nchild)
   return(ID.children)
 }
-Here_is_your_ID(Nchild,ID_scan)
+#Here_is_your_ID(Nchild,ID_scan)
 ##### REPLICATION LOOP START#####
 for(r in 1:replic){
   ##### INITIALISATION PATCHES #####
@@ -131,7 +131,7 @@ for(r in 1:replic){
     loci <- matrix(NA,nrow=population,ncol=20+1) #empty matrix for the locis
     
     for(x in 1:population){ #for each individual
-      loci[x,] <- round(runif(21,1,10)) #each individual has 20 random numbers (first 10:row //last 10:column)
+      loci[x,] <- ceiling(runif(21,1e-16,10)) #each individual has 20 random numbers (first 10:row //last 10:column)
       loci[x,21] <- x
     }
     
@@ -234,14 +234,14 @@ for(r in 1:replic){
     } #END LOOP PARTNERFINDING/mother
     
     patchbook <- rep(N.w$patch,Nchild) #each kid gets the patch of the mother
-    ID.children <- Here_is_your_ID(Nchild,ID_scan)
+    ID.children <- Here_is_your_ID(Nchild)
     trait.children <- c(rep(0,length(patchbook))) 
     survival.children <- c(rep(max.Age,length(patchbook))) #each child gets the survival of the maximum age
     gender.children <- gendergram #gender of the children are written into the matrix
     patch.children <- patchbook #patches of children are written into the matrix
     pop.new <- data.frame(ID.children,patch.children,gender.children,trait.children,survival.children)
     colnames(pop.new)<-c("ID","patch","gender","trait","survival") #colum names
-    
+    loci.new[,21]<-ID.children
     # gen_phen_map[locus,bla,bla](loci.new)
     values.new <- matrix(NA,nrow=sum(Nchild),ncol=10) #empty matrix for the trait values for each loci
 
@@ -311,6 +311,27 @@ for(r in 1:replic){
 }
 ##### REPLICATION LOOP END#####
 # })
+plot(Npop,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(0,max(Npop))) #plot traitvalue
+lines(Npatch.1,type="l",col="turquoise")
+lines(Npatch.2,type="l",col="violet")
+lines(Npatch.3,type="l",col="orange")
+
+
+
+plot(Trait.pop,main="mean trait value over time", xlab="generations",ylab="trait value",type="l",col="black",ylim = c(min(Trait.pop),max(Trait.pop)))
+
+
+
+
+plot(Females.patch.1,main="Frequency of the Sexes Patch 1", xlab="generations",ylab="frequency",type="l",col="red")
+lines(Males.patch.1,type="l",col="green")
+
+
+plot(Females.patch.2,main="Frequency of the Sexes Patch 2", xlab="generations",ylab="frequency",type="l",col="red")
+lines(Males.patch.2,type="l",col="green")
+
+plot(Females.patch.3,main="Frequency of the Sexes Patch 3", xlab="generations",ylab="frequency",type="l",col="red")
+lines(Males.patch.3,type="l",col="green")
 
 }#END MORPHEUS
 
