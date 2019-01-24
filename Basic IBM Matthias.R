@@ -2,7 +2,7 @@
 rm(list=ls())
 
 ##### START SIMULATION.RUN-FUNCTION #####
-simulation.fun <- function(replicates=5, #number of replicates
+simulation.fun <- function(replicates=1, #number of replicates
                    time=100, #number of generations
                    migrate=0.05, #migrationfactor
                    age=2, #age limit for an individual
@@ -293,18 +293,15 @@ meanF.patches.replicates <- rowMeans(meanF.patches.array, dims=2) #calculates th
 #})
 
 
-#################################
-##### PLOTS OVER REPLICATES #####
-#################################
-
-#PLOT 1: OVER REPLICATES
+##### PLOTS #####
+#PLOT 1
 colours <- c("turquoise","violet","orange","blue","red4","seagreen4")
 plot(meanpopulationsize.replicates,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(0,max(population.N))) #plot traitvalue
 for(ink in 1:patches){
   lines(meanN.patches.replicates[ink,],type="l",col=colours[ink])
 }
 
-#PLOT 2: OVER REPLICATES
+#PLOT 2
 plot(meantrait.replicates,main="mean trait value over time", xlab="generations",ylab="mean trait value",type="l",col="turquoise",ylim = c(min(population.meantrait),max(population.meantrait)))
 
 #PLOT3
@@ -313,27 +310,6 @@ for(paint in 1:patches){
   plot(meanM.patches.replicates[paint,],main="Frequency of the Sexes Patch x", xlab="generations",ylab="frequency",type="l",col="blue")
   lines(meanF.patches.replicates[paint,],type="l",col="red")
 }
-
-
-##################################
-##### PLOTS OVER 1 REPLICATE #####
-##################################
-
-#PLOT 1
-#plot(population.N,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(0,max(population.N))) #plot traitvalue
-#for(ink in 1:patches){
-#lines(statistic.total[ink,1,],type="l",col=colours[ink])
-#}
-
-#PLOT 2
-#plot(population.meantrait,main="mean trait value over time", xlab="generations",ylab="mean trait value",type="l",col="turquoise",ylim = c(min(population.meantrait),max(population.meantrait)))
-
-#PLOT3: PLOTS FOR EACH PATCH
-#par(mfrow=c(2,2))
-#for(paint in 1:patches){
-  #plot(statistic.total[paint,3,],main="Frequency of the Sexes Patch x", xlab="generations",ylab="frequency",type="l",col="red")
-  #lines(statistic.total[paint,2,],type="l",col="green")
-#}
 
 }#END SIMULATION.RUN
 simulation.fun()
