@@ -2,11 +2,11 @@
 rm(list=ls())
 
 ##### START SIMULATION.RUN-FUNCTION #####
-simulation.fun <- function(replicates=1, #number of replicates
-                   time=1000, #number of generations
+simulation.fun <- function(replicates=5, #number of replicates
+                   time=100, #number of generations
                    migrate=0.05, #migrationfactor
                    age=2, #age limit for an individual
-                   patches=4, #number of Patches
+                   patches=3, #number of Patches
                    mutate=0.05, #mutationfactor
                    die=0.05, #level.vector to die
                    
@@ -70,6 +70,14 @@ statistic.fun <- function(pop.matrix, Npatch){ #PATCH/STATISTIC-FUNCTION
         table(factor(pop.matrix[pop.matrix$gender=='female',]$patch,levels=1:Npatch)),
         as.numeric(traits))
 }
+
+
+##### MATRICES FOR PLOTS #####
+meantrait.matrix <- matrix(NA, nrow=replicates, ncol=time) #empty matrix for the mean trait value of the generations in each replicate
+meanpopulation.matrix <- matrix(NA, nrow=replicates, ncol=time) #empty matrix for the mean populationsize of the generations in each replicate
+meanN.patches.array <- array(NA,dim=c(patches,time,replicates)) #empty array for the mean populationsize of a patch of the generations in each replicate
+meanM.patches.array <- array(NA,dim=c(patches,time,replicates)) #empty array for the mean populationsize of males of a patch of the generations in each replicate
+meanF.patches.array <- array(NA,dim=c(patches,time,replicates)) #empty array for the mean populationsize of females of a patch of the generations in each replicate
 
 
 ##### REPLICATION LOOP START#####
@@ -266,29 +274,66 @@ for(r in 1:replicates){
     }#END IS ANYBODY THERE? 
     print(t)
   }##### END GENERATION LOOP #####
+  meantrait.matrix[r,] <- population.meantrait #writes the mean traitvalues of the replicate into the matrix for all replicates
+  meanpopulation.matrix[r,] <- population.N #writes the mean populationsize of the replicate into the matrix for all replicates
+  
+  for(pat in 1:patches){
+    meanN.patches.array[pat,,r] <- statistic.total[pat,1,] #the populationsize of all generations of patch pat is written into an array for each replicate
+    meanM.patches.array[pat,,r] <- statistic.total[pat,2,] #the populationsize of males of all generations of patch pat is written into an array for each replicate
+    meanF.patches.array[pat,,r] <- statistic.total[pat,3,] #the populationsize of females of all generations of patch pat is written into an array for each replicate
+  }
+  
+    
 }##### END REPLICATION LOOP #####
+meantrait.replicates <- colMeans(meantrait.matrix) #calculates the mean traitvalue of a generation over all replicates
+meanpopulationsize.replicates <- colMeans(meanpopulation.matrix) #calculates the mean populationsize of a generation over all replicates
+meanN.patches.replicates <- rowMeans(meanN.patches.array, dims=2) #calculates the mean populationsize of a generation of a patch over all replicates
+meanM.patches.replicates <- rowMeans(meanM.patches.array, dims=2) #calculates the mean populationsize of male of a generation of a patch over all replicates
+meanF.patches.replicates <- rowMeans(meanF.patches.array, dims=2) #calculates the mean populationsize of female of a generation of a patch over all replicates
 #})
 
 
-#PLOT 1 & 2
+#################################
+##### PLOTS OVER REPLICATES #####
+#################################
+
+#PLOT 1: OVER REPLICATES
 colours <- c("turquoise","violet","orange","blue","red4","seagreen4")
-par(mfrow=c(1,2))
-
-plot(population.N,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(0,max(population.N))) #plot traitvalue
+plot(meanpopulationsize.replicates,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(0,max(population.N))) #plot traitvalue
 for(ink in 1:patches){
-  lines(statistic.total[ink,1,],type="l",col=colours[ink])
+  lines(meanN.patches.replicates[ink,],type="l",col=colours[ink])
 }
 
-plot(population.meantrait,main="mean trait value over time", xlab="generations",ylab="trait value",type="l",col="black",ylim = c(min(population.meantrait),max(population.meantrait)))
+#PLOT 2: OVER REPLICATES
+plot(meantrait.replicates,main="mean trait value over time", xlab="generations",ylab="mean trait value",type="l",col="turquoise",ylim = c(min(population.meantrait),max(population.meantrait)))
 
-
-#PLOTS FOR EACH PATCH
+#PLOT3
 par(mfrow=c(2,2))
-
 for(paint in 1:patches){
-  plot(statistic.total[paint,3,],main="Frequency of the Sexes Patch x", xlab="generations",ylab="frequency",type="l",col="red")
-  lines(statistic.total[paint,2,],type="l",col="green")
+  plot(meanM.patches.replicates[paint,],main="Frequency of the Sexes Patch x", xlab="generations",ylab="frequency",type="l",col="blue")
+  lines(meanF.patches.replicates[paint,],type="l",col="red")
 }
+
+
+##################################
+##### PLOTS OVER 1 REPLICATE #####
+##################################
+
+#PLOT 1
+#plot(population.N,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(0,max(population.N))) #plot traitvalue
+#for(ink in 1:patches){
+#lines(statistic.total[ink,1,],type="l",col=colours[ink])
+#}
+
+#PLOT 2
+#plot(population.meantrait,main="mean trait value over time", xlab="generations",ylab="mean trait value",type="l",col="turquoise",ylim = c(min(population.meantrait),max(population.meantrait)))
+
+#PLOT3: PLOTS FOR EACH PATCH
+#par(mfrow=c(2,2))
+#for(paint in 1:patches){
+  #plot(statistic.total[paint,3,],main="Frequency of the Sexes Patch x", xlab="generations",ylab="frequency",type="l",col="red")
+  #lines(statistic.total[paint,2,],type="l",col="green")
+#}
 
 }#END SIMULATION.RUN
 simulation.fun()
