@@ -25,7 +25,7 @@ simulation.fun <- function(replicates=5, #number of replicates
                    c10=0.11670283
 ){
 switch(Sys.info()['user'],
-       bio23user = {setwd("/patchnumbers.vector/bio23user/Documents/Projects/Hiwi-ibm/Hiwi-ibm/")},
+       bio23user = {setwd("/home/bio23user/Documents/Projects/Hiwi-ibm/Hiwi-ibm/")},
        Leron = {setwd("C:/Users/Leron/Desktop/IBM_code/")},
        Anwender = {setwd("C:/Users/Anwender/Desktop/")})
 
