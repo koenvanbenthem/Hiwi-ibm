@@ -8,7 +8,7 @@ simulation.fun <- function(replicates=1, #number of replicates
                    age=2, #age limit for an individual
                    patches=3, #number of Patches
                    mutate=0.05, #mutationfactor
-                   die=0.05, #level.vector to die
+                   die=0.9, #level.vector to die
                    
                    #fecundity
                    a=0.49649467,
@@ -62,6 +62,9 @@ trait.fun <- function(row,pop.matrix,value.matrix,loci.matrix){ #TRAIT-VALUE-FUN
 
 
 statistic.fun <- function(pop.matrix, Npatch){ #PATCH/STATISTIC-FUNCTION
+  if(nrow(pop.matrix)==0){
+    return(NA)
+  }
   tmp <- aggregate(pop.matrix$trait,by=list(patch = pop.matrix$patch),mean)
   traits <- tmp$x[match(1:Npatch,tmp$patch)] 
   
@@ -133,20 +136,37 @@ for(r in 1:replicates){
   
     ##### GENERATION LOOP START #####  
     for(t in 1:time){
+      pop1<-population.total
       N <- nrow(population.total) #number of individuals in total (all patches included)
 
       
       if(N>0) { #START IS ANYBODY THERE-LOOP: if there are any individuals and the population is not extinct 
-        N.local <- c() #empty vector for local populationsize
-        N.female <- subset(population.total,population.total$gender=="female") #number of female individuals in total
-        N.male <- subset(population.total,population.total$gender=="male") #number of male individuals in total
-        level.vector <- c() #empty vector
         
-        for(pls in 1:patches){ #START IS OFFSPRING POSSIBLE?
-          level.vector <- c(level.vector,nlevels(subset(population.total,population.total$patch==pls)$gender)) #create a Vector which shows how many different arguments(levels) are in a vector 
+        tryst<-c(rep(0,patches))
+        N.female<-c()
+        offspring.vector<-0
+        for(pls in 1:patches){#in which patches are both males and females
+          if(
+            nrow(subset(population.total,population.total$patch==pls&population.total$gender=="male"))>0 &
+            nrow(subset(population.total,population.total$patch==pls&population.total$gender=="female"))>0
+          ){
+            tryst[pls]<-2
+          }
         }
         
-        if(max(level.vector)==2){ #if one patch contains both genders then it has a level of 2
+        for(neko in 1:patches){#all females which have males in their patches
+          if(tryst[neko]>0){
+            N.female<-rbind(N.female,subset(population.total,population.total$gender=="female"&population.total$patch==neko))
+          }
+        }
+        
+        
+        
+        
+        N.local <- c() #empty vector for local populationsize
+        N.male <- subset(population.total,population.total$gender=="male") #number of male individuals in total
+        
+        if(max(tryst)==2){ #if one patch contains both genders then it has a level of 2
           N.0 <- N/500
           
           for(j in 1:patches){ #loop over patches
@@ -156,7 +176,7 @@ for(r in 1:replicates){
           if(nrow(N.female)>0){ #number of offspring per femal
             offspring.vector <- 2*rpois(nrow(N.female),fitness.fun(a,b,N.female$trait,N.0,N.local[N.female$patch])) #each female gets a random number of offspring based on the fitness-function
           }
-        
+          
           ID.offspring <- c() #empty vector for the ID of the offspring
           patch.offspring <- c() #empty vector for the patch of the offspring
           gender.offspring <- c() #empty vector for the gender of the offspring
@@ -179,12 +199,13 @@ for(r in 1:replicates){
           if(nrow(N.female)>0){ #START ANY FEMALES?: loop starts if there is at least one female individual
             for(u in 1:nrow(N.female)){ #START LOOP PARTNERFINDING/mother 
               if(offspring.vector[u]>0){ #START GETS THE MOTHER OFFSPRING?
+                if(N.male.patch[N.female$patch[u]]>0){ #START ANY MALES IN THE PATCH OF THE MOTHER?: loop starts if there is at least one male individual in the mothers patch
                 mother <- N.female$ID[u] #gives the ID of the mother
                 ID.mother.offspring <- c(ID.mother.offspring, rep(mother,offspring.vector[u])) #ID of the mother is written into the vector for all her offspring
                 
               
                 ###FATHER####
-                if(N.male.patch[N.female$patch[u]]>0){ #START ANY MALES IN THE PATCH OF THE MOTHER?: loop starts if there is at least one male individual in the mothers patch
+                
                   father <- sample(N.male$ID[N.male$patch==N.female$patch[u]],1) #sample the ID of one male which patchnumber is the same as the patchnumber of the mother
                   ID.father.offspring <- c(ID.father.offspring,rep(father,offspring.vector[u])) #ID of the father is written into the vector as often as he becomes offspring with the mother
                   
@@ -215,6 +236,7 @@ for(r in 1:replicates){
                     } #END LOOP NUMBER CHILDREN
               } #END ANY MALES IN THE PATCH OF THE MOTHER?
             } #END GETS THE MOTHER OFFSPRING?
+          
           } #END LOOP PARTNERFINDING/mother
           
           patchbook <- rep(N.female$patch,offspring.vector) #each offspring becomes the patchnumber of the mother
@@ -249,7 +271,9 @@ for(r in 1:replicates){
         
       #erasing dead individuals:
       loci.total <- subset(loci.total,loci.total[,1]>(-2 )) #loci matrix: all rows with a -2 in the beginning are deleted
+      if(nrow(population.total)>0){
       population.total <-subset(population.total,population.total$survival>0) #population matrix: Individuals which have a survival higher then 0 stay alive in the dataframe. the others are deleted
+      }
       ##### END DEATH #####
         
         
@@ -274,6 +298,7 @@ for(r in 1:replicates){
     }#END IS ANYBODY THERE? 
     print(t)
   }##### END GENERATION LOOP #####
+    
   meantrait.matrix[r,] <- population.meantrait #writes the mean traitvalues of the replicate into the matrix for all replicates
   meanpopulation.matrix[r,] <- population.N #writes the mean populationsize of the replicate into the matrix for all replicates
   
