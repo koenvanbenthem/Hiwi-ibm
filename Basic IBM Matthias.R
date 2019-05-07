@@ -8,7 +8,7 @@ simulation.fun <- function(replicates=1, #number of replicates
                    age=2, #age limit for an individual
                    patches=3, #number of Patches
                    mutate=0.05, #mutationfactor
-                   die=0.9, #level.vector to die
+                   die=0.05, #level.vector to die
                    
                    #fecundity
                    a=0.49649467,
@@ -320,21 +320,26 @@ meanF.patches.replicates <- rowMeans(meanF.patches.array, dims=2) #calculates th
 
 ##### PLOTS #####
 #PLOT 1
+par(mfrow=c(1,1))
 colours <- c("turquoise","violet","orange","blue","red4","seagreen4")
-plot(meanpopulationsize.replicates,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(0,max(population.N))) #plot traitvalue
+plot(meanpopulationsize.replicates,main="Population over time", xlab="generations",ylab="population",type="l",col="black",ylim =c(1,max(meanpopulationsize.replicates))) #plot traitvalue
 for(ink in 1:patches){
   lines(meanN.patches.replicates[ink,],type="l",col=colours[ink])
 }
 
 #PLOT 2
-plot(meantrait.replicates,main="mean trait value over time", xlab="generations",ylab="mean trait value",type="l",col="turquoise",ylim = c(min(population.meantrait),max(population.meantrait)))
+
+plot(meantrait.replicates,main="mean trait value over time", xlab="generations",ylab="mean trait value",type="l",col="turquoise",ylim = range(meantrait.replicates,na.rm = TRUE))
 
 #PLOT3
 par(mfrow=c(2,2))
 for(paint in 1:patches){
-  plot(meanM.patches.replicates[paint,],main="Frequency of the Sexes Patch x", xlab="generations",ylab="frequency",type="l",col="blue")
+  plot(meanM.patches.replicates[paint,], xlab="generations",ylab="frequency",type="l",col="blue")
+  title(main=paste("Frequency of the Sexes Patch",paint))
   lines(meanF.patches.replicates[paint,],type="l",col="red")
 }
+
+
 
 }#END SIMULATION.RUN
 simulation.fun()
